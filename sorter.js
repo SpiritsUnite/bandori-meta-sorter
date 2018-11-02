@@ -1,5 +1,4 @@
 "use strict";
-/// <reference path="./song.ts" />
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -35,6 +34,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __values = (this && this.__values) || function (o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+};
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
     if (!m) return o;
@@ -51,186 +60,91 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __spread = (this && this.__spread) || function () {
-    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
-    return ar;
-};
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
-    if (m) return m.call(o);
+function parse_filters() {
     return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
-        }
+        diff: new Set(["easy", "normal", "hard", "expert", "special"].filter(function (d) {
+            return document.getElementById(d + "-filter").checked;
+        }))
     };
-};
-var song_data;
-function parse_skills() {
-    var e_1, _a;
-    var form_ids = __spread(Array(5).keys()).map(function (x) { return ["skill" + x, "sl" + x]; });
-    var ret = [];
+}
+function add_songs() {
+    var e_1, _a, e_2, _b, e_3, _c;
+    var skills = parse_skills();
+    var options = parse_options();
+    var filters = parse_filters();
+    var songs = [];
     try {
-        for (var form_ids_1 = __values(form_ids), form_ids_1_1 = form_ids_1.next(); !form_ids_1_1.done; form_ids_1_1 = form_ids_1.next()) {
-            var ids = form_ids_1_1.value;
-            ret.push({
-                mult: parseInt(document.getElementById(ids[0]).value),
-                sl: parseInt(document.getElementById(ids[1]).value)
-            });
+        for (var song_data_1 = __values(song_data), song_data_1_1 = song_data_1.next(); !song_data_1_1.done; song_data_1_1 = song_data_1.next()) {
+            var song = song_data_1_1.value;
+            try {
+                for (var _d = __values(Object.entries(song.charts)), _e = _d.next(); !_e.done; _e = _d.next()) {
+                    var _f = __read(_e.value, 2), diff = _f[0], chart = _f[1];
+                    chart && songs.push([
+                        song, diff,
+                        min_mult(chart, skills, options) * 100,
+                        avg_mult(chart, skills, options) * 100,
+                        max_mult(chart, skills, options) * 100,
+                    ]);
+                }
+            }
+            catch (e_2_1) { e_2 = { error: e_2_1 }; }
+            finally {
+                try {
+                    if (_e && !_e.done && (_b = _d["return"])) _b.call(_d);
+                }
+                finally { if (e_2) throw e_2.error; }
+            }
         }
     }
     catch (e_1_1) { e_1 = { error: e_1_1 }; }
     finally {
         try {
-            if (form_ids_1_1 && !form_ids_1_1.done && (_a = form_ids_1["return"])) _a.call(form_ids_1);
+            if (song_data_1_1 && !song_data_1_1.done && (_a = song_data_1["return"])) _a.call(song_data_1);
         }
         finally { if (e_1) throw e_1.error; }
     }
-    return ret;
-}
-function add_song() {
-    var fields = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        fields[_i] = arguments[_i];
-    }
-    var table = document.querySelector("#song-list");
-    if (table) {
-        var row = document.createElement("tr");
-        for (var i = 0; i < fields.length; i++) {
-            var field_td = document.createElement("td");
-            field_td.textContent = fields[i];
-            field_td.setAttribute("data-" + i, fields[i]);
-            row.appendChild(field_td);
-        }
-        table.appendChild(row);
-    }
-}
-function reset_songs() {
-    var table = document.querySelector("#song-list");
-    if (table && table.parentNode) {
-        table.parentNode.replaceChild(table.cloneNode(false), table);
-    }
-}
-var Display;
-(function (Display) {
-    Display[Display["All"] = 0] = "All";
-    Display[Display["PreferEn"] = 1] = "PreferEn";
-    Display[Display["OnlyEn"] = 2] = "OnlyEn";
-})(Display || (Display = {}));
-function parse_options() {
-    return {
-        display: parseInt(document.getElementById("display").value),
-        diff: new Set(["easy", "normal", "hard", "expert", "special"].filter(function (d) {
-            return document.getElementById(d + "-filter").checked;
-        })),
-        fever: document.getElementById("fever").checked
-    };
-}
-function add_songs() {
-    var e_2, _a;
-    var skills = parse_skills();
-    var options = parse_options();
-    var songs = song_data.map(function (song) { return [avg_mult(song, skills, options.fever), song]; });
-    songs.sort().reverse();
+    songs.sort(function (a, b) { return b[2] - a[2]; });
     try {
         for (var songs_1 = __values(songs), songs_1_1 = songs_1.next(); !songs_1_1.done; songs_1_1 = songs_1.next()) {
-            var _b = __read(songs_1_1.value, 2), mult = _b[0], song = _b[1];
-            var title = void 0;
-            if (options.display && song.en_title) {
-                title = song.en_title;
-            }
-            else if (options.display == Display.OnlyEn) {
+            var _g = __read(songs_1_1.value, 5), song = _g[0], diff = _g[1], min = _g[2], avg = _g[3], max = _g[4];
+            if (!filters.diff.has(diff))
                 continue;
-            }
-            else {
-                title = song.title;
-            }
-            if (!options.diff.has(song.diff))
+            var title = locale_title(song, options);
+            if (!title)
                 continue;
-            add_song(title, song.diff, Math.round(mult * 100) + "%");
+            add_song([title, "order.html?song_id=" + song.song_id + "&diff=" + diff], diff, Math.round(min) + "%", Math.round(avg) + "%", Math.round(max) + "%");
         }
     }
-    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+    catch (e_3_1) { e_3 = { error: e_3_1 }; }
     finally {
         try {
-            if (songs_1_1 && !songs_1_1.done && (_a = songs_1["return"])) _a.call(songs_1);
+            if (songs_1_1 && !songs_1_1.done && (_c = songs_1["return"])) _c.call(songs_1);
         }
-        finally { if (e_2) throw e_2.error; }
-    }
-}
-function load_songs() {
-    return __awaiter(this, void 0, void 0, function () {
-        var response;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, fetch("songs.json")];
-                case 1:
-                    response = _a.sent();
-                    return [4 /*yield*/, response.json()];
-                case 2: return [2 /*return*/, _a.sent()];
-            }
-        });
-    });
-}
-function load_options(form) {
-    for (var i = 0; i < form.elements.length; i++) {
-        var e = form.elements[i];
-        var d = localStorage.getItem(e.id);
-        if (!d) {
-            if (e.dataset["default"] !== undefined) {
-                d = e.dataset["default"];
-            }
-            else
-                continue;
-        }
-        if (e instanceof HTMLInputElement) {
-            if (e.type === "text") {
-                e.value = d;
-            }
-            else if (e.type === "checkbox") {
-                e.checked = JSON.parse(d);
-            }
-        }
-        else if (e instanceof HTMLSelectElement) {
-            e.value = d;
-        }
-    }
-}
-function save_options(form) {
-    for (var i = 0; i < form.elements.length; i++) {
-        var e = form.elements[i];
-        if (e instanceof HTMLInputElement) {
-            if (e.type === "text") {
-                localStorage.setItem(e.id, e.value);
-            }
-            else if (e.type === "checkbox") {
-                localStorage.setItem(e.id, JSON.stringify(e.checked));
-            }
-        }
-        else if (e instanceof HTMLSelectElement) {
-            localStorage.setItem(e.id, e.value);
-        }
+        finally { if (e_3) throw e_3.error; }
     }
 }
 function init() {
     return __awaiter(this, void 0, void 0, function () {
-        var form, gen_button;
+        var gen_button, cb;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    form = document.getElementById("skills");
-                    load_options(form);
+                    load_options();
                     return [4 /*yield*/, load_songs()];
                 case 1:
                     song_data = _a.sent();
                     add_songs();
-                    form.addEventListener("submit", function (event) {
-                        event.preventDefault();
-                        save_options(form);
+                    gen_button = document.getElementById("gen-button");
+                    cb = function () {
+                        save_options();
                         reset_songs();
                         add_songs();
+                    };
+                    gen_button.addEventListener("click", cb);
+                    ["easy", "normal", "hard", "expert", "special"].forEach(function (d) {
+                        return document.getElementById(d + "-filter")
+                            .addEventListener("change", cb);
                     });
-                    gen_button = document.getElementById("gen-button");
                     gen_button.disabled = false;
                     return [2 /*return*/];
             }
