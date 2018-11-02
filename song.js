@@ -79,11 +79,11 @@ var Type;
     Type[Type["Hybrid"] = 1] = "Hybrid";
     Type[Type["Support"] = 2] = "Support";
 })(Type || (Type = {}));
-function locale_title(song, options) {
-    if (options.display && song.en_title) {
+function locale_title(song, display) {
+    if (display && song.en_title) {
         return song.en_title;
     }
-    else if (options.display == Display.OnlyEn) {
+    else if (display == Display.OnlyEn) {
         return null;
     }
     else {
@@ -105,8 +105,9 @@ function skill_perms(skills) {
         switch (_a.label) {
             case 0:
                 cmp = function (l, r) { return l.mult - r.mult || l.sl - r.sl; };
+                skills = __spread(skills);
                 skills.sort(cmp);
-                return [4 /*yield*/, skills.slice()];
+                return [4 /*yield*/, __spread(skills)];
             case 1:
                 _a.sent();
                 _loop_1 = function () {
@@ -120,7 +121,7 @@ function skill_perms(skills) {
                                 l = Math.max.apply(Math, __spread(skills.map(function (v, i) { return cmp(skills[k], v) < 0 ? i : -1; })));
                                 _a = __read([skills[l], skills[k]], 2), skills[k] = _a[0], skills[l] = _a[1];
                                 skills = skills.slice(0, k + 1).concat(skills.slice(k + 1).reverse());
-                                return [4 /*yield*/, skills.slice()];
+                                return [4 /*yield*/, __spread(skills)];
                             case 1:
                                 _b.sent();
                                 return [2 /*return*/];
@@ -178,7 +179,7 @@ function avg_mult_helper(mult_f, base_f) {
             finally { if (e_1) throw e_1.error; }
         }
         var ret = base_f(chart) + c_sum / 5;
-        if (encore === -1)
+        if (encore == -1)
             ret += max_enc(mult_f, chart, skills);
         else
             ret += skills[encore].mult / 100 * mult_f(chart, 5, skills[encore].sl);
@@ -211,7 +212,7 @@ function full_skill_mult(chart, skills, options) {
     if (options.encore === -1)
         ret += max_enc(mult_f, chart, skills);
     else
-        ret += skills[options.encore].mult / 100 * mult_f(chart, 5, skills[options.encore].sl);
+        ret += options.skills[options.encore].mult / 100 * mult_f(chart, 5, options.skills[options.encore].sl);
     ret += perm_mult(mult_f, chart, skills);
     return ret;
 }

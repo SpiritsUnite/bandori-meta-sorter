@@ -1,13 +1,15 @@
 {% extends "base.html.virt" %}
 {% set page = "index" %}
 {% block head %}
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
 <script src="song.js" defer></script>
 <script src="util.js" defer></script>
 <script src="sorter.js" defer></script>
 {% endblock head %}
 
 {% block content %}
-<div class="form-row form-inline justify-content-end mb-3">
+<div id="filters" class="form-row form-inline justify-content-end mb-3">
 {% for diff in ("easy", "normal") %}
   <div class="custom-control custom-checkbox custom-control-inline">
     <input class="custom-control-input" type="checkbox" id="{{diff}}-filter" data-default="false">
@@ -28,17 +30,20 @@
     </select>
   </div>
 </div>
-<table class="table table-striped table-sm" style="transform: translate3d(0,0,0); -webkit-transform: translate3d(0,0,0)">
-  <thead class="thead-dark">
-    <tr>
-      <th scope="col">Song</th>
-      <th scope="col">Difficulty</th>
-      <th scope="col">Min</th>
-      <th scope="col">Avg</th>
-      <th scope="col">Max</th>
-    </tr>
-  </thead>
-  <tbody id="song-list">
-  </tbody>
-</table>
+<div class="table-responsive">
+  <table class="table table-striped table-sm" style="transform: translate3d(0,0,0); -webkit-transform: translate3d(0,0,0)">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col" style="cursor: pointer; width: 40%;">Song<i class="material-icons invisible">arrow_drop_up</i></th>
+        <th scope="col" style="cursor: pointer">Difficulty<i class="material-icons invisible">arrow_drop_up</i></th>
+        <th scope="col" style="cursor: pointer">Lv<i class="material-icons invisible">arrow_drop_down</i></th>
+        <th scope="col" style="cursor: pointer">Min<i class="material-icons invisible">arrow_drop_down</i></th>
+        <th scope="col" style="cursor: pointer">Avg<i class="material-icons">arrow_drop_down</i></th>
+        <th scope="col" style="cursor: pointer">Max<i class="material-icons invisible">arrow_drop_down</i></th>
+      </tr>
+    </thead>
+    <tbody id="song-list">
+    </tbody>
+  </table>
+</div>
 {% endblock content %}

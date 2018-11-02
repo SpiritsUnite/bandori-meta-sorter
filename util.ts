@@ -42,7 +42,7 @@ function add_song(...fields: (string | [string, string])[]) {
     }
 }
 
-function reset_songs() {
+function reset_table() {
     const table = document.querySelector("#song-list");
     if (table && table.parentNode) {
         table.parentNode.replaceChild(table.cloneNode(false), table);
@@ -56,15 +56,19 @@ enum Display {
 }
 
 interface Options {
+    skills: Skill[];
     display: Display;
     fever: boolean;
+    bp: number;
     encore: number;
 }
 
 function parse_options(): Options {
     return {
+        skills: parse_skills(),
         display: parseInt(get_input(document.getElementById("display"))),
         fever: (<HTMLInputElement>document.getElementById("fever")).checked,
+        bp: parseInt(get_input(document.getElementById("bp"))),
         encore: parseInt(get_input(document.getElementById("encore"))),
     };
 }
@@ -76,7 +80,7 @@ async function load_songs() {
 
 function get_input(e: HTMLElement | null) {
     if (e instanceof HTMLInputElement) {
-        if (e.type === "text") return e.value;
+        if (e.type === "text" || e.type === "number") return e.value;
         else if (e.type === "checkbox") return JSON.stringify(e.checked);
     }
     else if (e instanceof HTMLSelectElement) return e.value;
@@ -85,30 +89,45 @@ function get_input(e: HTMLElement | null) {
 
 function set_input(e: HTMLElement | null, value: string) {
     if (e instanceof HTMLInputElement) {
-        if (e.type === "text") e.value = value;
+        if (e.type === "text" || e.type === "number") e.value = value;
         else if (e.type === "checkbox") e.checked = JSON.parse(value);
     }
     else if (e instanceof HTMLSelectElement) e.value = value;
 }
 
 const fields = document.querySelectorAll("input,select");
-function load_options() {
+const opt_fields = document.querySelectorAll("#options input,#options select");
+function load_field(e: HTMLElement) {
+    let d = localStorage.getItem(e.id);
+    if (!d) {
+        if (e.dataset.default !== undefined) {
+            d = e.dataset.default;
+        } else return;
+    }
+    set_input(e, d);
+}
+
+function load_all_fields() {
     for (let i = 0; i < fields.length; i++) {
-        let e = <HTMLElement>fields[i];
-        let d = localStorage.getItem(e.id);
-        if (!d) {
-            if (e.dataset.default !== undefined) {
-                d = e.dataset.default;
-            } else continue;
-        }
-        set_input(e, d);
+        load_field(<HTMLElement>fields[i]);
+    }
+
+    for (let i = 0; i < opt_fields.length; i++) {
+        opt_fields[i].addEventListener("change", e => e.srcElement!.classList.add("is-changed"));
     }
 }
 
-function save_options() {
+function save_field(e: HTMLElement) {
+    let d = get_input(e);
+    if (d !== undefined) localStorage.setItem(e.id, d);
+}
+
+function save_all_fields() {
     for (let i = 0; i < fields.length; i++) {
-        let e = <HTMLElement>fields[i];
-        let d = get_input(e);
-        if (d !== undefined) localStorage.setItem(e.id, d);
+        save_field(<HTMLElement>fields[i]);
+    }
+
+    for (let i = 0; i < opt_fields.length; i++) {
+        opt_fields[i].classList.remove("is-changed");
     }
 }

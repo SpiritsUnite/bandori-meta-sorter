@@ -46,10 +46,10 @@ interface Skill {
     sl: number;
 }
 
-function locale_title(song: Song, options: Options): string | null {
-    if (options.display && song.en_title) {
+function locale_title(song: Song, display: Display): string | null {
+    if (display && song.en_title) {
         return song.en_title;
-    } else if (options.display == Display.OnlyEn) {
+    } else if (display == Display.OnlyEn) {
         return null;
     } else {
         return song.title;
@@ -70,15 +70,16 @@ function base_combo(chart: Chart) {
 
 function* skill_perms(skills: Skill[]) {
     let cmp = (l: Skill, r: Skill) => l.mult - r.mult || l.sl - r.sl;
+    skills = [...skills];
     skills.sort(cmp);
-    yield skills.slice();
+    yield [...skills];
     while (true) {
         let k = Math.max(...skills.slice(0,-1).map((v, i) => cmp(v, skills[i+1]) < 0 ? i : -1));
         if (k == -1) return;
         let l = Math.max(...skills.map((v, i) => cmp(skills[k], v) < 0 ? i : -1));
         [skills[k], skills[l]] = [skills[l], skills[k]];
         skills = skills.slice(0,k+1).concat(skills.slice(k+1).reverse());
-        yield skills.slice();
+        yield [...skills];
     }
 }
 
@@ -114,7 +115,7 @@ function avg_mult_helper(mult_f: MultF, base_f: (chart: Chart) => number) {
             }
         }
         let ret = base_f(chart) + c_sum/5;
-        if (encore === -1) ret += max_enc(mult_f, chart, skills);
+        if (encore == -1) ret += max_enc(mult_f, chart, skills);
         else ret += skills[encore].mult / 100 * mult_f(chart, 5, skills[encore].sl);
         return ret;
     }
@@ -147,7 +148,7 @@ function full_skill_mult(chart: Chart, skills: Skill[], options: Options) {
     if (options.encore === -1)
         ret += max_enc(mult_f, chart, skills);
     else
-        ret += skills[options.encore].mult / 100 * mult_f(chart, 5, skills[options.encore].sl);
+        ret += options.skills[options.encore].mult / 100 * mult_f(chart, 5, options.skills[options.encore].sl);
     ret += perm_mult(mult_f, chart, skills);
     return ret;
 }

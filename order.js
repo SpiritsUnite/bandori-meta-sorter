@@ -70,7 +70,7 @@ function init_song_list(options) {
     var e_1, _a;
     song_sel.innerHTML = "";
     var titles = song_data.map(function (song) {
-        return [song, locale_title(song, options)];
+        return [song, locale_title(song, options.display)];
     }).filter(function (x) { return x[1] !== null; });
     titles.sort(function (a, b) { return a[1].localeCompare(b[1]); });
     try {
@@ -99,11 +99,16 @@ function add_orders(skills, options, sel) {
     if (!chart)
         return;
     var orders = all_mult(chart, skills, options);
-    orders.sort(function (a, b) { return a[0] - b[0]; });
+    orders.sort(function (a, b) { return b[0] - a[0]; });
     try {
         for (var orders_1 = __values(orders), orders_1_1 = orders_1.next(); !orders_1_1.done; orders_1_1 = orders_1.next()) {
             var _b = __read(orders_1_1.value, 2), mult = _b[0], order = _b[1];
-            add_song.apply(void 0, __spread(order.map(skill_string), [Math.round(mult * 100) + "%"]));
+            if (options.bp) {
+                add_song.apply(void 0, __spread(order.map(skill_string), [Math.round(mult * options.bp).toLocaleString()]));
+            }
+            else {
+                add_song.apply(void 0, __spread(order.map(skill_string), [Math.round(mult * 100) + "%"]));
+            }
         }
     }
     catch (e_2_1) { e_2 = { error: e_2_1 }; }
@@ -131,27 +136,34 @@ function unparse_sel(sel) {
     set_input(document.getElementById("song"), sel.song_id.toString());
     set_input(document.getElementById("diff"), sel.diff);
 }
+function save_sel() {
+    save_field(document.getElementById("song"));
+    save_field(document.getElementById("diff"));
+    save_field(document.getElementById("display"));
+}
+function load_sel() {
+    load_field(document.getElementById("song"));
+    load_field(document.getElementById("diff"));
+    load_field(document.getElementById("display"));
+}
+var ord_options;
 function gen_orders() {
-    save_options();
-    reset_songs();
-    var skills = parse_skills();
-    var options = parse_options();
+    save_sel();
+    reset_table();
     var sel = parse_sel();
-    add_orders(skills, options, sel);
+    add_orders(ord_options.skills, ord_options, sel);
 }
 function order_init() {
     return __awaiter(this, void 0, void 0, function () {
-        var options, urlParams, _a, song_id, diff;
+        var urlParams, _a, song_id, diff;
         return __generator(this, function (_b) {
             switch (_b.label) {
-                case 0:
-                    load_options();
-                    return [4 /*yield*/, load_songs()];
+                case 0: return [4 /*yield*/, load_songs()];
                 case 1:
                     song_data = _b.sent();
-                    options = parse_options();
-                    init_song_list(options);
-                    load_options();
+                    init_song_list(ord_options);
+                    // load options a second time as song selection is now initialised
+                    load_sel();
                     urlParams = new URLSearchParams(window.location.search);
                     _a = __read(["song_id", "diff"].map(function (x) { return urlParams.get(x); }), 2), song_id = _a[0], diff = _a[1];
                     if (song_id !== null && diff !== null)
@@ -162,12 +174,22 @@ function order_init() {
         });
     });
 }
+load_all_fields();
+ord_options = parse_options();
 order_init().then(function () {
     song_sel.addEventListener("change", gen_orders);
     diff_sel.addEventListener("change", gen_orders);
     var display_sel = document.getElementById("display");
-    display_sel.addEventListener("change", function () { save_options(); order_init(); });
+    display_sel.addEventListener("change", function () {
+        save_sel();
+        ord_options.display = parse_options().display;
+        order_init();
+    });
     var gen_button = document.getElementById("gen-button");
-    gen_button.addEventListener("click", function () { save_options(); order_init(); });
+    gen_button.addEventListener("click", function () {
+        save_all_fields();
+        ord_options = parse_options();
+        order_init();
+    });
     gen_button.disabled = false;
 });

@@ -4,7 +4,7 @@ const diff_sel = <HTMLSelectElement>document.getElementById("diff");
 function init_song_list(options: Options) {
     song_sel.innerHTML = "";
     let titles = song_data.map((song) : [Song, string | null] =>
-        [song, locale_title(song, options)]
+        [song, locale_title(song, options.display)]
     ).filter((x): x is [Song, string] => x[1] !== null);
     titles.sort((a, b) => a[1].localeCompare(b[1]));
     for (let [song, title] of titles) {
@@ -27,9 +27,13 @@ function add_orders(skills: Skill[], options: Options, sel: SongSel) {
     if (!chart) return;
 
     let orders = all_mult(chart, skills, options);
-    orders.sort((a, b) => a[0] - b[0]);
+    orders.sort((a, b) => b[0] - a[0]);
     for (let [mult, order] of orders) {
-        add_song(...order.map(skill_string), Math.round(mult*100) + "%");
+        if (options.bp) {
+            add_song(...order.map(skill_string), Math.round(mult * options.bp).toLocaleString());
+        } else {
+            add_song(...order.map(skill_string), Math.round(mult*100) + "%");
+        }
     }
 
 }
@@ -53,21 +57,33 @@ function unparse_sel(sel: SongSel) {
     set_input(document.getElementById("diff"), sel.diff);
 }
 
+function save_sel() {
+    save_field(document.getElementById("song")!);
+    save_field(document.getElementById("diff")!);
+    save_field(document.getElementById("display")!);
+}
+
+function load_sel() {
+    load_field(document.getElementById("song")!);
+    load_field(document.getElementById("diff")!);
+    load_field(document.getElementById("display")!);
+}
+
+let ord_options : Options;
+
 function gen_orders() {
-    save_options();
-    reset_songs();
-    const skills = parse_skills();
-    const options = parse_options();
+    save_sel();
+    reset_table();
     let sel = parse_sel();
-    add_orders(skills, options, sel);
+    add_orders(ord_options.skills, ord_options, sel);
 }
 
 async function order_init() {
-    load_options();
     song_data = await load_songs();
-    const options = parse_options();
-    init_song_list(options);
-    load_options();
+    init_song_list(ord_options);
+
+    // load options a second time as song selection is now initialised
+    load_sel();
 
     const urlParams = new URLSearchParams(window.location.search);
     let [song_id, diff] = ["song_id", "diff"].map(x => urlParams.get(x));
@@ -77,14 +93,24 @@ async function order_init() {
     gen_orders();
 }
 
+load_all_fields();
+ord_options = parse_options();
 order_init().then(() => {
     song_sel.addEventListener("change", gen_orders);
     diff_sel.addEventListener("change", gen_orders);
 
     const display_sel = <HTMLSelectElement>document.getElementById("display");
-    display_sel.addEventListener("change", () => {save_options(); order_init();});
+    display_sel.addEventListener("change", () => {
+        save_sel();
+        ord_options.display = parse_options().display;
+        order_init();
+    });
 
     const gen_button = <HTMLButtonElement>document.getElementById("gen-button");
-    gen_button.addEventListener("click", () => {save_options(); order_init();});
+    gen_button.addEventListener("click", () => {
+        save_all_fields();
+        ord_options = parse_options();
+        order_init();
+    });
     gen_button.disabled = false;
 });

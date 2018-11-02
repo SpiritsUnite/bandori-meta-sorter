@@ -1,0 +1,22 @@
+input[type='number'] {
+    -moz-appearance:textfield;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.material-icons {
+    vertical-align: middle;
+}
+
+.is-changed {
+    border-color: #ffc107;
+    z-index: 1;
+}
+
+.custom-control-input.is-changed ~ .custom-control-label {
+    color: #e6ac00;
+}

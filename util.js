@@ -119,7 +119,7 @@ function add_song() {
         table.appendChild(row);
     }
 }
-function reset_songs() {
+function reset_table() {
     var table = document.querySelector("#song-list");
     if (table && table.parentNode) {
         table.parentNode.replaceChild(table.cloneNode(false), table);
@@ -133,8 +133,10 @@ var Display;
 })(Display || (Display = {}));
 function parse_options() {
     return {
+        skills: parse_skills(),
         display: parseInt(get_input(document.getElementById("display"))),
         fever: document.getElementById("fever").checked,
+        bp: parseInt(get_input(document.getElementById("bp"))),
         encore: parseInt(get_input(document.getElementById("encore")))
     };
 }
@@ -154,7 +156,7 @@ function load_songs() {
 }
 function get_input(e) {
     if (e instanceof HTMLInputElement) {
-        if (e.type === "text")
+        if (e.type === "text" || e.type === "number")
             return e.value;
         else if (e.type === "checkbox")
             return JSON.stringify(e.checked);
@@ -165,7 +167,7 @@ function get_input(e) {
 }
 function set_input(e, value) {
     if (e instanceof HTMLInputElement) {
-        if (e.type === "text")
+        if (e.type === "text" || e.type === "number")
             e.value = value;
         else if (e.type === "checkbox")
             e.checked = JSON.parse(value);
@@ -174,25 +176,36 @@ function set_input(e, value) {
         e.value = value;
 }
 var fields = document.querySelectorAll("input,select");
-function load_options() {
-    for (var i = 0; i < fields.length; i++) {
-        var e = fields[i];
-        var d = localStorage.getItem(e.id);
-        if (!d) {
-            if (e.dataset["default"] !== undefined) {
-                d = e.dataset["default"];
-            }
-            else
-                continue;
+var opt_fields = document.querySelectorAll("#options input,#options select");
+function load_field(e) {
+    var d = localStorage.getItem(e.id);
+    if (!d) {
+        if (e.dataset["default"] !== undefined) {
+            d = e.dataset["default"];
         }
-        set_input(e, d);
+        else
+            return;
+    }
+    set_input(e, d);
+}
+function load_all_fields() {
+    for (var i = 0; i < fields.length; i++) {
+        load_field(fields[i]);
+    }
+    for (var i = 0; i < opt_fields.length; i++) {
+        opt_fields[i].addEventListener("change", function (e) { return e.srcElement.classList.add("is-changed"); });
     }
 }
-function save_options() {
+function save_field(e) {
+    var d = get_input(e);
+    if (d !== undefined)
+        localStorage.setItem(e.id, d);
+}
+function save_all_fields() {
     for (var i = 0; i < fields.length; i++) {
-        var e = fields[i];
-        var d = get_input(e);
-        if (d !== undefined)
-            localStorage.setItem(e.id, d);
+        save_field(fields[i]);
+    }
+    for (var i = 0; i < opt_fields.length; i++) {
+        opt_fields[i].classList.remove("is-changed");
     }
 }
