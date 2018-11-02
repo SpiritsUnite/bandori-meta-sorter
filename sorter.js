@@ -125,7 +125,7 @@ function add_songs() {
 }
 function init() {
     return __awaiter(this, void 0, void 0, function () {
-        var gen_button, cb;
+        var gen_button, cb, display_sel;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -145,6 +145,8 @@ function init() {
                         return document.getElementById(d + "-filter")
                             .addEventListener("change", cb);
                     });
+                    display_sel = document.getElementById("display");
+                    display_sel.addEventListener("change", cb);
                     gen_button.disabled = false;
                     return [2 /*return*/];
             }

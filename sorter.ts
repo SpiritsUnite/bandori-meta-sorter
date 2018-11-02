@@ -52,6 +52,9 @@ async function init() {
         (<HTMLInputElement>document.getElementById(d + "-filter"))
         .addEventListener("change", cb));
 
+    const display_sel = <HTMLSelectElement>document.getElementById("display");
+    display_sel.addEventListener("change", cb);
+
     gen_button.disabled = false;
 }
 
