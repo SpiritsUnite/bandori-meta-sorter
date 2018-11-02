@@ -4,8 +4,5 @@
         "strict": true,
         "lib": ["es2017", "dom"],
         "downlevelIteration": true
-    },
-    "exclude": [
-        "table.ts"
-    ]
+    }
 }
