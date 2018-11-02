@@ -1,31 +1,4 @@
 "use strict";
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
     if (!m) return o;
@@ -56,8 +29,8 @@ var __values = (this && this.__values) || function (o) {
         }
     };
 };
+var cutoffs = [1, 21, 51, 101, 151, 201, 251, 301, 401, 501, 601, 701, 9999];
 function combo(start, end) {
-    var cutoffs = [1, 21, 51, 101, 151, 201, 251, 301, 401, 501, 601, 701, 9999];
     if (end <= start)
         return 0;
     var c_sum = 0;
@@ -100,46 +73,27 @@ function base_combo(chart) {
     return base(chart) * combo(1, chart.combo + 1);
 }
 function skill_perms(skills) {
-    var cmp, _loop_1, state_1;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                cmp = function (l, r) { return l.mult - r.mult || l.sl - r.sl; };
-                skills = __spread(skills);
-                skills.sort(cmp);
-                return [4 /*yield*/, __spread(skills)];
-            case 1:
-                _a.sent();
-                _loop_1 = function () {
-                    var _a, k, l;
-                    return __generator(this, function (_b) {
-                        switch (_b.label) {
-                            case 0:
-                                k = Math.max.apply(Math, __spread(skills.slice(0, -1).map(function (v, i) { return cmp(v, skills[i + 1]) < 0 ? i : -1; })));
-                                if (k == -1)
-                                    return [2 /*return*/, { value: void 0 }];
-                                l = Math.max.apply(Math, __spread(skills.map(function (v, i) { return cmp(skills[k], v) < 0 ? i : -1; })));
-                                _a = __read([skills[l], skills[k]], 2), skills[k] = _a[0], skills[l] = _a[1];
-                                skills = skills.slice(0, k + 1).concat(skills.slice(k + 1).reverse());
-                                return [4 /*yield*/, __spread(skills)];
-                            case 1:
-                                _b.sent();
-                                return [2 /*return*/];
-                        }
-                    });
-                };
-                _a.label = 2;
-            case 2:
-                if (!true) return [3 /*break*/, 4];
-                return [5 /*yield**/, _loop_1()];
-            case 3:
-                state_1 = _a.sent();
-                if (typeof state_1 === "object")
-                    return [2 /*return*/, state_1.value];
-                return [3 /*break*/, 2];
-            case 4: return [2 /*return*/];
-        }
-    });
+    var ret = [];
+    var cmp = function (l, r) { return l.mult - r.mult || l.sl - r.sl; };
+    skills = skills.slice();
+    skills.sort(cmp);
+    ret.push(skills.slice());
+    var _loop_1 = function () {
+        var _a;
+        var k = Math.max.apply(Math, __spread(skills.slice(0, -1).map(function (v, i) { return cmp(v, skills[i + 1]) < 0 ? i : -1; })));
+        if (k == -1)
+            return "break";
+        var l = Math.max.apply(Math, __spread(skills.map(function (v, i) { return cmp(skills[k], v) < 0 ? i : -1; })));
+        _a = __read([skills[l], skills[k]], 2), skills[k] = _a[0], skills[l] = _a[1];
+        skills = skills.slice(0, k + 1).concat(skills.slice(k + 1).reverse());
+        ret.push(skills.slice());
+    };
+    while (true) {
+        var state_1 = _loop_1();
+        if (state_1 === "break")
+            break;
+    }
+    return ret;
 }
 function sl_mult(chart, skill, sl) {
     var _a = __read(chart.skill[skill][sl], 2), st = _a[0], num = _a[1];
@@ -151,13 +105,14 @@ function perm_mult(mult_f, chart, skills) {
     return ret;
 }
 function perm_sort(mult_f, chart, skills) {
-    var perm_list = __spread(skill_perms(skills)).map(function (ss) {
+    var perm_list = skill_perms(skills).map(function (ss) {
         return [perm_mult(mult_f, chart, ss), ss];
     });
     return perm_list.sort(function (a, b) { return a[0] - b[0]; });
 }
 function max_enc(mult_f, chart, skills) {
-    return Math.max.apply(Math, __spread(skills.map(function (s) { return s.mult / 100 * mult_f(chart, 5, s.sl); })));
+    var mults = __spread(skills.map(function (s) { return s.mult / 100 * mult_f(chart, 5, s.sl); }));
+    return mults.reduce(function (max_idx, x, i) { return x > mults[max_idx] ? i : max_idx; }, 0);
 }
 function avg_mult_helper(mult_f, base_f) {
     return function (chart, skills, encore) {
@@ -180,9 +135,8 @@ function avg_mult_helper(mult_f, base_f) {
         }
         var ret = base_f(chart) + c_sum / 5;
         if (encore == -1)
-            ret += max_enc(mult_f, chart, skills);
-        else
-            ret += skills[encore].mult / 100 * mult_f(chart, 5, skills[encore].sl);
+            encore = max_enc(mult_f, chart, skills);
+        ret += skills[encore].mult / 100 * mult_f(chart, 5, skills[encore].sl);
         return ret;
     };
 }
@@ -209,25 +163,102 @@ function full_skill_mult(chart, skills, options) {
     var ret = base_combo(chart);
     if (options.fever)
         ret += fev_mult(chart);
-    if (options.encore === -1)
-        ret += max_enc(mult_f, chart, skills);
-    else
-        ret += options.skills[options.encore].mult / 100 * mult_f(chart, 5, options.skills[options.encore].sl);
+    var encore = options.encore === -1 ? max_enc(mult_f, chart, options.skills) : options.encore;
+    ret += options.skills[encore].mult / 100 * mult_f(chart, 5, options.skills[encore].sl);
     ret += perm_mult(mult_f, chart, skills);
     return ret;
 }
+function full_skill_mult_exact(chart, skills, options) {
+    var e_2, _a, e_3, _b;
+    var encore = options.encore;
+    if (encore == -1)
+        encore = max_enc(options.fever ? sl_mult_fev : sl_mult, chart, skills);
+    skills = __spread(skills, [skills[encore]]);
+    // types of events
+    // combo cutoff, skill act, fever, skill end
+    var events = [];
+    events.push([chart.combo + 1, "end"]);
+    try {
+        for (var cutoffs_1 = __values(cutoffs), cutoffs_1_1 = cutoffs_1.next(); !cutoffs_1_1.done; cutoffs_1_1 = cutoffs_1.next()) {
+            var c = cutoffs_1_1.value;
+            c > 1 && c <= chart.combo && events.push([c, "combo"]);
+        }
+    }
+    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+    finally {
+        try {
+            if (cutoffs_1_1 && !cutoffs_1_1.done && (_a = cutoffs_1["return"])) _a.call(cutoffs_1);
+        }
+        finally { if (e_2) throw e_2.error; }
+    }
+    for (var i = 0; i < 6; i++) {
+        var _c = __read(chart.skill[i][skills[i].sl], 2), start = _c[0], notes = _c[1];
+        events.push([start, "skill_start"]);
+        events.push([start + notes, "skill_end"]);
+    }
+    if (options.fever) {
+        events.push([chart.fever[0], "fever_start"]);
+        events.push([chart.fever[1], "fever_end"]);
+    }
+    events.sort(function (a, b) { return a[0] - b[0]; });
+    //floor(floor(bp×3×{(level - 5)×0.01+1}÷combo×1.1×combo_mult)×skill)
+    var last = 1;
+    var combo_mult = 1;
+    var fev_mult = 1;
+    var cur_skill = 0;
+    var active = [];
+    var score = 0;
+    var bp = options.bp || 100;
+    try {
+        for (var events_1 = __values(events), events_1_1 = events_1.next(); !events_1_1.done; events_1_1 = events_1.next()) {
+            var _d = __read(events_1_1.value, 2), at = _d[0], event_1 = _d[1];
+            var skill_mult = active.reduce(function (x, y) { return x * y; }, 1);
+            var note_score = (((bp * base(chart) * combo_mult / chart.combo + 0.00001) | 0) * fev_mult * skill_mult + 0.00001) | 0;
+            score += (at - last) * note_score;
+            last = at;
+            if (event_1 === "combo")
+                combo_mult += 0.01;
+            else if (event_1 === "skill_start")
+                active.push((100 + skills[cur_skill++].mult) / 100);
+            else if (event_1 === "skill_end")
+                active.shift();
+            else if (event_1 === "fever_start")
+                fev_mult = 2;
+            else if (event_1 === "fever_end")
+                fev_mult = 1;
+            else if (event_1 === "end")
+                break;
+            else
+                (function (x) { throw "oops"; })(event_1);
+        }
+    }
+    catch (e_3_1) { e_3 = { error: e_3_1 }; }
+    finally {
+        try {
+            if (events_1_1 && !events_1_1.done && (_b = events_1["return"])) _b.call(events_1);
+        }
+        finally { if (e_3) throw e_3.error; }
+    }
+    return score;
+}
 function max_mult(chart, skills, options) {
     var mult_f = options.fever ? sl_mult_fev : sl_mult;
-    return full_skill_mult(chart, perm_sort(mult_f, chart, skills).slice(-1)[0][1], options);
+    return full_skill_mult_exact(chart, perm_sort(mult_f, chart, skills).slice(-1)[0][1], options);
 }
 function min_mult(chart, skills, options) {
     var mult_f = options.fever ? sl_mult_fev : sl_mult;
-    return full_skill_mult(chart, perm_sort(mult_f, chart, skills)[0][1], options);
+    return full_skill_mult_exact(chart, perm_sort(mult_f, chart, skills)[0][1], options);
+}
+function min_max_mult(chart, skills, options) {
+    var mult_f = options.fever ? sl_mult_fev : sl_mult;
+    var perms = perm_sort(mult_f, chart, skills);
+    return [full_skill_mult_exact(chart, perms[0][1], options),
+        full_skill_mult_exact(chart, perms[perms.length - 1][1], options)];
 }
 function all_mult(chart, skills, options) {
     var mult_f = options.fever ? sl_mult_fev : sl_mult;
     return perm_sort(mult_f, chart, skills).map(function (_a) {
         var _b = __read(_a, 2), mult = _b[0], order = _b[1];
-        return [full_skill_mult(chart, order, options), order];
+        return [full_skill_mult_exact(chart, order, options), order];
     });
 }

@@ -78,22 +78,25 @@ var chart_table;
 var chart_options;
 function gen_song_table(options) {
     var e_1, _a, e_2, _b;
-    var bp = options.bp || 100;
     chart_options = options;
     chart_table = [];
+    var bp = options.bp || 100;
     try {
         for (var song_data_1 = __values(song_data), song_data_1_1 = song_data_1.next(); !song_data_1_1.done; song_data_1_1 = song_data_1.next()) {
             var song = song_data_1_1.value;
             try {
                 for (var _c = __values(Object.entries(song.charts)), _d = _c.next(); !_d.done; _d = _c.next()) {
                     var _e = __read(_d.value, 2), diff = _e[0], chart = _e[1];
-                    chart && chart_table.push({
+                    if (!chart)
+                        continue;
+                    var _f = __read(min_max_mult(chart, options.skills, options), 2), min = _f[0], max = _f[1];
+                    chart_table.push({
                         song: song,
                         chart: chart,
                         diff: diff,
-                        min: min_mult(chart, options.skills, options) * bp,
-                        avg: avg_mult(chart, options.skills, options) * bp,
-                        max: max_mult(chart, options.skills, options) * bp
+                        min: min,
+                        avg: Math.min(avg_mult(chart, options.skills, options) * bp, max),
+                        max: max
                     });
                 }
             }

@@ -30,18 +30,21 @@ let chart_table : ChartRow[];
 let chart_options : Options;
 
 function gen_song_table(options : Options) {
-    let bp = options.bp || 100;
     chart_options = options;
     chart_table = [];
+
+    let bp = options.bp || 100;
     for (let song of song_data) {
         for (let [diff, chart] of Object.entries(song.charts)) {
-            chart && chart_table.push({
+            if (!chart) continue;
+            let [min, max] = min_max_mult(chart, options.skills, options);
+            chart_table.push({
                 song: song,
                 chart: chart,
                 diff: diff,
-                min: min_mult(chart, options.skills, options) * bp,
-                avg: avg_mult(chart, options.skills, options) * bp,
-                max: max_mult(chart, options.skills, options) * bp,
+                min: min,
+                avg: Math.min(avg_mult(chart, options.skills, options) * bp, max),
+                max: max,
             });
         }
     }
