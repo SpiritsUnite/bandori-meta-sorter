@@ -19,9 +19,9 @@
         <small class="text-muted">Disclaimer: WIP</small>
       </h2>
       <div id="options">
-        <div class="row mb-2">
+        <div class="row">
       {% for i in range(5) %}
-          <div class="col-lg">
+          <div class="col-sm mb-2">
             <label>Skill {{i+1}}</label>
             <div class="input-group">
               <select class="custom-select" data-default="[100,0,4]" id="skill{{i}}">
@@ -47,7 +47,9 @@
               </select>
             </div>
           </div>
+          {% if i % 2 == 1 %}<div class="w-100 d-lg-none"></div>{% endif %}
       {% endfor %}
+        <div class="w-50 d-lg-none"></div>
         </div>
         <div class="form-row align-items-center justify-content-end mb-3">
           <div class="col-auto">
