@@ -1,33 +1,6 @@
 let song_data: Song[];
 
-function parse_skills(): Skill[] {
-    let ret = [];
-    for (let id = 0; id < 5; id++) {
-        let skill_field = document.getElementById(`skill${id}`)
-        let sl_field = document.getElementById(`sl${id}`)
-        let [mult, type, rarity] = JSON.parse(get_input(skill_field));
-        let lv = parseInt(get_input(sl_field));
-        ret.push({
-            mult: mult,
-            rarity: rarity,
-            type: type,
-            sl: lv ? lv + 4*type : lv,
-        });
-    }
-    return ret;
-}
-
-function unparse_skills(skills: Skill[]): void {
-    for (let id = 0; id < 5; id++) {
-        let s = skills[id];
-        set_input(document.getElementById(`skill${id}`),
-            JSON.stringify([s.mult, s.type, s.rarity]));
-        set_input(document.getElementById(`sl${id}`),
-            JSON.stringify(s.sl ? s.sl - 4*s.type : s.sl));
-    }
-}
-
-function add_song(...fields: (string | [string, string])[]) {
+function add_row(...fields: (string | [string, string])[]) {
     const table = document.querySelector("#song-list");
     if (table) {
         let row = document.createElement("tr");
@@ -75,6 +48,33 @@ const DEFAULT_OPTIONS: Options = {
     encore: -1,
 };
 
+function parse_skills(): Skill[] {
+    let ret = [];
+    for (let id = 0; id < 5; id++) {
+        let skill_field = document.getElementById(`skill${id}`)
+        let sl_field = document.getElementById(`sl${id}`)
+        let [mult, type, rarity] = JSON.parse(get_input(skill_field));
+        let lv = parseInt(get_input(sl_field));
+        ret.push({
+            mult: mult,
+            rarity: rarity,
+            type: type,
+            sl: lv ? lv + 4*type : lv,
+        });
+    }
+    return ret;
+}
+
+function unparse_skills(skills: Skill[]): void {
+    for (let id = 0; id < 5; id++) {
+        let s = skills[id];
+        set_input(document.getElementById(`skill${id}`),
+            JSON.stringify([s.mult, s.type, s.rarity]));
+        set_input(document.getElementById(`sl${id}`),
+            JSON.stringify(s.sl ? s.sl - 4*s.type : s.sl));
+    }
+}
+
 function parse_options(): Options {
     return {
         skills: parse_skills(),
@@ -108,6 +108,7 @@ function options_init(on_change: (options: Options) => void): void {
     })
     gen_button.disabled = false;
 
+    const opt_fields = document.querySelectorAll("#options input,#options select");
     for (let i = 0; i < opt_fields.length; i++) {
         opt_fields[i].addEventListener("change", e => e.srcElement!.classList.add("is-changed"));
     }
@@ -136,8 +137,6 @@ function set_input(e: HTMLElement | null, value: string) {
     else if (e instanceof HTMLSelectElement) e.value = value;
 }
 
-const fields = document.querySelectorAll("input,select");
-const opt_fields = document.querySelectorAll("#options input,#options select");
 function load_field(e: HTMLElement) {
     let d = localStorage.getItem(e.id);
     if (!d) {
@@ -148,27 +147,7 @@ function load_field(e: HTMLElement) {
     set_input(e, d);
 }
 
-function load_all_fields() {
-    for (let i = 0; i < fields.length; i++) {
-        load_field(<HTMLElement>fields[i]);
-    }
-
-    for (let i = 0; i < opt_fields.length; i++) {
-        opt_fields[i].addEventListener("change", e => e.srcElement!.classList.add("is-changed"));
-    }
-}
-
 function save_field(e: HTMLElement) {
     let d = get_input(e);
     if (d !== undefined) localStorage.setItem(e.id, d);
-}
-
-function save_all_fields() {
-    for (let i = 0; i < fields.length; i++) {
-        save_field(<HTMLElement>fields[i]);
-    }
-
-    for (let i = 0; i < opt_fields.length; i++) {
-        opt_fields[i].classList.remove("is-changed");
-    }
 }

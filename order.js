@@ -137,10 +137,10 @@ function add_orders(skills, options, sel) {
         for (var orders_1 = __values(orders), orders_1_1 = orders_1.next(); !orders_1_1.done; orders_1_1 = orders_1.next()) {
             var _b = __read(orders_1_1.value, 2), mult = _b[0], order = _b[1];
             if (options.bp) {
-                add_song.apply(void 0, __spread(order.map(skill_string), [Math.round(mult).toLocaleString()]));
+                add_row.apply(void 0, __spread(order.map(skill_string), [Math.round(mult).toLocaleString()]));
             }
             else {
-                add_song.apply(void 0, __spread(order.map(skill_string), [Math.round(mult) + "%"]));
+                add_row.apply(void 0, __spread(order.map(skill_string), [Math.round(mult) + "%"]));
             }
         }
     }

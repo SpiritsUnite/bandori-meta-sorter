@@ -167,7 +167,7 @@ function display_song_table() {
     try {
         for (var sortable_1 = __values(sortable), sortable_1_1 = sortable_1.next(); !sortable_1_1.done; sortable_1_1 = sortable_1.next()) {
             var _c = __read(sortable_1_1.value, 7), title = _c[0], diff = _c[1], level = _c[2], min = _c[3], avg = _c[4], max = _c[5], song_id = _c[6];
-            add_song([title, "order.html?song_id=" + song_id + "&diff=" + diff], diff, level.toString(), Math.round(min).toLocaleString() + score_end, Math.round(avg).toLocaleString() + score_end, Math.round(max).toLocaleString() + score_end);
+            add_row([title, "order.html?song_id=" + song_id + "&diff=" + diff], diff, level.toString(), Math.round(min).toLocaleString() + score_end, Math.round(avg).toLocaleString() + score_end, Math.round(max).toLocaleString() + score_end);
         }
     }
     catch (e_4_1) { e_4 = { error: e_4_1 }; }

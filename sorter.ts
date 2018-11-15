@@ -89,7 +89,7 @@ function display_song_table() {
     });
     let score_end = chart_options.bp ? "" : "%";
     for (let [title, diff, level, min, avg, max, song_id] of sortable) {
-        add_song(
+        add_row(
             [title, `order.html?song_id=${song_id}&diff=${diff}`],
             diff, level.toString(),
             Math.round(min).toLocaleString() + score_end,

@@ -61,30 +61,7 @@ var __values = (this && this.__values) || function (o) {
     };
 };
 var song_data;
-function parse_skills() {
-    var ret = [];
-    for (var id = 0; id < 5; id++) {
-        var skill_field = document.getElementById("skill" + id);
-        var sl_field = document.getElementById("sl" + id);
-        var _a = __read(JSON.parse(get_input(skill_field)), 3), mult = _a[0], type = _a[1], rarity = _a[2];
-        var lv = parseInt(get_input(sl_field));
-        ret.push({
-            mult: mult,
-            rarity: rarity,
-            type: type,
-            sl: lv ? lv + 4 * type : lv
-        });
-    }
-    return ret;
-}
-function unparse_skills(skills) {
-    for (var id = 0; id < 5; id++) {
-        var s = skills[id];
-        set_input(document.getElementById("skill" + id), JSON.stringify([s.mult, s.type, s.rarity]));
-        set_input(document.getElementById("sl" + id), JSON.stringify(s.sl ? s.sl - 4 * s.type : s.sl));
-    }
-}
-function add_song() {
+function add_row() {
     var fields = [];
     for (var _i = 0; _i < arguments.length; _i++) {
         fields[_i] = arguments[_i];
@@ -131,6 +108,29 @@ var DEFAULT_OPTIONS = {
     bp: 200000,
     encore: -1
 };
+function parse_skills() {
+    var ret = [];
+    for (var id = 0; id < 5; id++) {
+        var skill_field = document.getElementById("skill" + id);
+        var sl_field = document.getElementById("sl" + id);
+        var _a = __read(JSON.parse(get_input(skill_field)), 3), mult = _a[0], type = _a[1], rarity = _a[2];
+        var lv = parseInt(get_input(sl_field));
+        ret.push({
+            mult: mult,
+            rarity: rarity,
+            type: type,
+            sl: lv ? lv + 4 * type : lv
+        });
+    }
+    return ret;
+}
+function unparse_skills(skills) {
+    for (var id = 0; id < 5; id++) {
+        var s = skills[id];
+        set_input(document.getElementById("skill" + id), JSON.stringify([s.mult, s.type, s.rarity]));
+        set_input(document.getElementById("sl" + id), JSON.stringify(s.sl ? s.sl - 4 * s.type : s.sl));
+    }
+}
 function parse_options() {
     return {
         skills: parse_skills(),
@@ -172,6 +172,7 @@ function options_init(on_change) {
         on_change(options);
     });
     gen_button.disabled = false;
+    var opt_fields = document.querySelectorAll("#options input,#options select");
     for (var i = 0; i < opt_fields.length; i++) {
         opt_fields[i].addEventListener("change", function (e) { return e.srcElement.classList.add("is-changed"); });
     }
@@ -213,8 +214,6 @@ function set_input(e, value) {
     else if (e instanceof HTMLSelectElement)
         e.value = value;
 }
-var fields = document.querySelectorAll("input,select");
-var opt_fields = document.querySelectorAll("#options input,#options select");
 function load_field(e) {
     var d = localStorage.getItem(e.id);
     if (!d) {
@@ -226,24 +225,8 @@ function load_field(e) {
     }
     set_input(e, d);
 }
-function load_all_fields() {
-    for (var i = 0; i < fields.length; i++) {
-        load_field(fields[i]);
-    }
-    for (var i = 0; i < opt_fields.length; i++) {
-        opt_fields[i].addEventListener("change", function (e) { return e.srcElement.classList.add("is-changed"); });
-    }
-}
 function save_field(e) {
     var d = get_input(e);
     if (d !== undefined)
         localStorage.setItem(e.id, d);
-}
-function save_all_fields() {
-    for (var i = 0; i < fields.length; i++) {
-        save_field(fields[i]);
-    }
-    for (var i = 0; i < opt_fields.length; i++) {
-        opt_fields[i].classList.remove("is-changed");
-    }
 }

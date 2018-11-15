@@ -68,9 +68,9 @@ function add_orders(skills: Skill[], options: Options, sel: SongSel) {
     orders.sort((a, b) => b[0] - a[0]);
     for (let [mult, order] of orders) {
         if (options.bp) {
-            add_song(...order.map(skill_string), Math.round(mult).toLocaleString());
+            add_row(...order.map(skill_string), Math.round(mult).toLocaleString());
         } else {
-            add_song(...order.map(skill_string), Math.round(mult) + "%");
+            add_row(...order.map(skill_string), Math.round(mult) + "%");
         }
     }
 
