@@ -1,41 +1,10 @@
 const song_sel = <HTMLSelectElement>document.getElementById("song");
 const diff_sel = <HTMLSelectElement>document.getElementById("diff");
-
-function init_song_list(options: Options) {
-    song_sel.innerHTML = "";
-    let titles = song_data.map((song) : [Song, string | null] =>
-        [song, locale_title(song, options.display)]
-    ).filter((x): x is [Song, string] => x[1] !== null);
-    titles.sort((a, b) => a[1].localeCompare(b[1]));
-    for (let [song, title] of titles) {
-        let option = document.createElement("option");
-        option.value = song.song_id.toString();
-        option.textContent = title;
-        song_sel.add(option);
-    }
-}
+const display_sel = <HTMLSelectElement>document.getElementById("display");
 
 interface SongSel {
     song_id: number;
     diff: string;
-}
-
-function add_orders(skills: Skill[], options: Options, sel: SongSel) {
-    let song = song_data.filter(song => song.song_id == sel.song_id)[0];
-    if (!hasDiff(song.charts, sel.diff)) return;
-    let chart = song.charts[sel.diff];
-    if (!chart) return;
-
-    let orders = all_mult(chart, skills, options);
-    orders.sort((a, b) => b[0] - a[0]);
-    for (let [mult, order] of orders) {
-        if (options.bp) {
-            add_song(...order.map(skill_string), Math.round(mult * options.bp).toLocaleString());
-        } else {
-            add_song(...order.map(skill_string), Math.round(mult*100) + "%");
-        }
-    }
-
 }
 
 function parse_sel() {
@@ -66,51 +35,74 @@ function save_sel() {
 function load_sel() {
     load_field(document.getElementById("song")!);
     load_field(document.getElementById("diff")!);
-    load_field(document.getElementById("display")!);
-}
-
-let ord_options : Options;
-
-function gen_orders() {
-    save_sel();
-    reset_table();
-    let sel = parse_sel();
-    add_orders(ord_options.skills, ord_options, sel);
-}
-
-async function order_init() {
-    song_data = await load_songs();
-    init_song_list(ord_options);
-
-    // load options a second time as song selection is now initialised
-    load_sel();
 
     const urlParams = new URLSearchParams(window.location.search);
     let [song_id, diff] = ["song_id", "diff"].map(x => urlParams.get(x));
     if (song_id !== null && diff !== null)
         unparse_sel({song_id: parseInt(song_id), diff: diff});
-
-    gen_orders();
 }
 
-load_all_fields();
-ord_options = parse_options();
-order_init().then(() => {
+// initialises the song picker
+function init_song_list(display: Display) {
+    song_sel.innerHTML = "";
+    let titles = song_data.map((song) : [Song, string | null] =>
+        [song, locale_title(song, display)]
+    ).filter((x): x is [Song, string] => x[1] !== null);
+    titles.sort((a, b) => a[1].localeCompare(b[1]));
+    for (let [song, title] of titles) {
+        let option = document.createElement("option");
+        option.value = song.song_id.toString();
+        option.textContent = title;
+        song_sel.add(option);
+    }
+}
+
+// Adds all orders to table
+function add_orders(skills: Skill[], options: Options, sel: SongSel) {
+    let song = song_data.filter(song => song.song_id == sel.song_id)[0];
+    if (!hasDiff(song.charts, sel.diff)) return;
+    let chart = song.charts[sel.diff];
+    if (!chart) return;
+
+    let orders = all_mult(chart, skills, options);
+    orders.sort((a, b) => b[0] - a[0]);
+    for (let [mult, order] of orders) {
+        if (options.bp) {
+            add_song(...order.map(skill_string), Math.round(mult).toLocaleString());
+        } else {
+            add_song(...order.map(skill_string), Math.round(mult) + "%");
+        }
+    }
+
+}
+
+async function order_init() {
+    let ord_options : Options;
+
+    function gen_orders() {
+        save_sel();
+        reset_table();
+        let sel = parse_sel();
+        add_orders(ord_options.skills, ord_options, sel);
+    }
+
+    song_data = await load_songs();
+    load_field(document.getElementById("display")!);
+
+    init_song_list(parseInt(get_input(document.getElementById("display"))));
+
+    load_sel();
+
+    options_init(options => { ord_options = options; gen_orders(); });
     song_sel.addEventListener("change", gen_orders);
     diff_sel.addEventListener("change", gen_orders);
 
     const display_sel = <HTMLSelectElement>document.getElementById("display");
     display_sel.addEventListener("change", () => {
-        save_sel();
-        ord_options.display = parse_options().display;
-        order_init();
+        init_song_list(parseInt(get_input(document.getElementById("display"))));
+        load_sel();
+        gen_orders();
     });
+}
 
-    const gen_button = <HTMLButtonElement>document.getElementById("gen-button");
-    gen_button.addEventListener("click", () => {
-        save_all_fields();
-        ord_options = parse_options();
-        order_init();
-    });
-    gen_button.disabled = false;
-});
+order_init();

@@ -1,23 +1,30 @@
-interface SongSelect {
-    song_id: number;
-    diff: Diffs;
-}
-
 let song_data: Song[];
 
 function parse_skills(): Skill[] {
-    const form_ids = [...Array(5).keys()].map(x => ["skill" + x, "sl" + x]);
     let ret = [];
-    for (let ids of form_ids) {
-        let [mult, type, rarity] = JSON.parse(get_input(document.getElementById(ids[0])));
-        let lv = parseInt(get_input(document.getElementById(ids[1])));
+    for (let id = 0; id < 5; id++) {
+        let skill_field = document.getElementById(`skill${id}`)
+        let sl_field = document.getElementById(`sl${id}`)
+        let [mult, type, rarity] = JSON.parse(get_input(skill_field));
+        let lv = parseInt(get_input(sl_field));
         ret.push({
             mult: mult,
             rarity: rarity,
+            type: type,
             sl: lv ? lv + 4*type : lv,
         });
     }
     return ret;
+}
+
+function unparse_skills(skills: Skill[]): void {
+    for (let id = 0; id < 5; id++) {
+        let s = skills[id];
+        set_input(document.getElementById(`skill${id}`),
+            JSON.stringify([s.mult, s.type, s.rarity]));
+        set_input(document.getElementById(`sl${id}`),
+            JSON.stringify(s.sl ? s.sl - 4*s.type : s.sl));
+    }
 }
 
 function add_song(...fields: (string | [string, string])[]) {
@@ -57,20 +64,53 @@ enum Display {
 
 interface Options {
     skills: Skill[];
-    display: Display;
     fever: boolean;
     bp: number;
     encore: number;
 }
+const DEFAULT_OPTIONS: Options = {
+    skills: Array(5).fill({mult: 100, rarity: 4, type: 0, sl: 0}),
+    fever: true,
+    bp: 200000,
+    encore: -1,
+};
 
 function parse_options(): Options {
     return {
         skills: parse_skills(),
-        display: parseInt(get_input(document.getElementById("display"))),
-        fever: (<HTMLInputElement>document.getElementById("fever")).checked,
+        fever: JSON.parse(get_input(document.getElementById("fever"))),
         bp: parseInt(get_input(document.getElementById("bp"))),
         encore: parseInt(get_input(document.getElementById("encore"))),
     };
+}
+
+function unparse_options(options: Options): void {
+    unparse_skills(options.skills);
+    for (let id of <(keyof Options)[]>["fever", "bp", "encore"]) {
+        let field = document.getElementById(id);
+        set_input(field, JSON.stringify(options[id]));
+        field!.classList.remove("is-changed");
+    }
+}
+
+function options_init(on_change: (options: Options) => void): void {
+    let saved = localStorage.getItem("options");
+    let saved_opts = saved === null ? DEFAULT_OPTIONS : JSON.parse(saved);
+    unparse_options(saved_opts);
+    on_change(saved_opts);
+
+    const gen_button = document.getElementById("gen-button");
+    if (!(gen_button instanceof HTMLButtonElement)) throw "gen-button not found";
+    gen_button.addEventListener("click", () => {
+        let options = parse_options();
+        localStorage.setItem("options", JSON.stringify(options));
+        on_change(options);
+    })
+    gen_button.disabled = false;
+
+    for (let i = 0; i < opt_fields.length; i++) {
+        opt_fields[i].addEventListener("change", e => e.srcElement!.classList.add("is-changed"));
+    }
 }
 
 async function load_songs() {
@@ -78,7 +118,8 @@ async function load_songs() {
     return await response.json();
 }
 
-function get_input(e: HTMLElement | null) {
+function get_input(e: HTMLElement | null): string {
+    if (e instanceof HTMLElement) e.classList.remove("is-changed");
     if (e instanceof HTMLInputElement) {
         if (e.type === "text" || e.type === "number") return e.value;
         else if (e.type === "checkbox") return JSON.stringify(e.checked);

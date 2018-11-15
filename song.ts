@@ -44,6 +44,7 @@ enum Type {
 interface Skill {
     mult: number;
     rarity: number;
+    type: number;
     sl: number;
 }
 
@@ -221,7 +222,7 @@ function min_max_mult(chart: Chart, skills: Skill[], options: Options): [number,
 
 function all_mult(chart: Chart, skills: Skill[], options: Options) {
     const mult_f = options.fever ? sl_mult_fev : sl_mult;
-    return perm_sort(mult_f, chart, skills).map(
-        ([mult, order]): [number, Skill[]] =>
+    return skill_perms(skills).map(
+        (order): [number, Skill[]] =>
         [full_skill_mult_exact(chart, order, options), order]);
 }

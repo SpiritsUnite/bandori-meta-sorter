@@ -34,16 +34,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
-    if (m) return m.call(o);
-    return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
-        }
-    };
-};
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
     if (!m) return o;
@@ -60,65 +50,23 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
+var __values = (this && this.__values) || function (o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+};
 var __spread = (this && this.__spread) || function () {
     for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
     return ar;
 };
 var song_sel = document.getElementById("song");
 var diff_sel = document.getElementById("diff");
-function init_song_list(options) {
-    var e_1, _a;
-    song_sel.innerHTML = "";
-    var titles = song_data.map(function (song) {
-        return [song, locale_title(song, options.display)];
-    }).filter(function (x) { return x[1] !== null; });
-    titles.sort(function (a, b) { return a[1].localeCompare(b[1]); });
-    try {
-        for (var titles_1 = __values(titles), titles_1_1 = titles_1.next(); !titles_1_1.done; titles_1_1 = titles_1.next()) {
-            var _b = __read(titles_1_1.value, 2), song = _b[0], title = _b[1];
-            var option = document.createElement("option");
-            option.value = song.song_id.toString();
-            option.textContent = title;
-            song_sel.add(option);
-        }
-    }
-    catch (e_1_1) { e_1 = { error: e_1_1 }; }
-    finally {
-        try {
-            if (titles_1_1 && !titles_1_1.done && (_a = titles_1["return"])) _a.call(titles_1);
-        }
-        finally { if (e_1) throw e_1.error; }
-    }
-}
-function add_orders(skills, options, sel) {
-    var e_2, _a;
-    var song = song_data.filter(function (song) { return song.song_id == sel.song_id; })[0];
-    if (!hasDiff(song.charts, sel.diff))
-        return;
-    var chart = song.charts[sel.diff];
-    if (!chart)
-        return;
-    var orders = all_mult(chart, skills, options);
-    orders.sort(function (a, b) { return b[0] - a[0]; });
-    try {
-        for (var orders_1 = __values(orders), orders_1_1 = orders_1.next(); !orders_1_1.done; orders_1_1 = orders_1.next()) {
-            var _b = __read(orders_1_1.value, 2), mult = _b[0], order = _b[1];
-            if (options.bp) {
-                add_song.apply(void 0, __spread(order.map(skill_string), [Math.round(mult * options.bp).toLocaleString()]));
-            }
-            else {
-                add_song.apply(void 0, __spread(order.map(skill_string), [Math.round(mult * 100) + "%"]));
-            }
-        }
-    }
-    catch (e_2_1) { e_2 = { error: e_2_1 }; }
-    finally {
-        try {
-            if (orders_1_1 && !orders_1_1.done && (_a = orders_1["return"])) _a.call(orders_1);
-        }
-        finally { if (e_2) throw e_2.error; }
-    }
-}
+var display_sel = document.getElementById("display");
 function parse_sel() {
     var diff = get_input(document.getElementById("diff"));
     var ret = {
@@ -144,52 +92,95 @@ function save_sel() {
 function load_sel() {
     load_field(document.getElementById("song"));
     load_field(document.getElementById("diff"));
-    load_field(document.getElementById("display"));
+    var urlParams = new URLSearchParams(window.location.search);
+    var _a = __read(["song_id", "diff"].map(function (x) { return urlParams.get(x); }), 2), song_id = _a[0], diff = _a[1];
+    if (song_id !== null && diff !== null)
+        unparse_sel({ song_id: parseInt(song_id), diff: diff });
 }
-var ord_options;
-function gen_orders() {
-    save_sel();
-    reset_table();
-    var sel = parse_sel();
-    add_orders(ord_options.skills, ord_options, sel);
+// initialises the song picker
+function init_song_list(display) {
+    var e_1, _a;
+    song_sel.innerHTML = "";
+    var titles = song_data.map(function (song) {
+        return [song, locale_title(song, display)];
+    }).filter(function (x) { return x[1] !== null; });
+    titles.sort(function (a, b) { return a[1].localeCompare(b[1]); });
+    try {
+        for (var titles_1 = __values(titles), titles_1_1 = titles_1.next(); !titles_1_1.done; titles_1_1 = titles_1.next()) {
+            var _b = __read(titles_1_1.value, 2), song = _b[0], title = _b[1];
+            var option = document.createElement("option");
+            option.value = song.song_id.toString();
+            option.textContent = title;
+            song_sel.add(option);
+        }
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (titles_1_1 && !titles_1_1.done && (_a = titles_1["return"])) _a.call(titles_1);
+        }
+        finally { if (e_1) throw e_1.error; }
+    }
+}
+// Adds all orders to table
+function add_orders(skills, options, sel) {
+    var e_2, _a;
+    var song = song_data.filter(function (song) { return song.song_id == sel.song_id; })[0];
+    if (!hasDiff(song.charts, sel.diff))
+        return;
+    var chart = song.charts[sel.diff];
+    if (!chart)
+        return;
+    var orders = all_mult(chart, skills, options);
+    orders.sort(function (a, b) { return b[0] - a[0]; });
+    try {
+        for (var orders_1 = __values(orders), orders_1_1 = orders_1.next(); !orders_1_1.done; orders_1_1 = orders_1.next()) {
+            var _b = __read(orders_1_1.value, 2), mult = _b[0], order = _b[1];
+            if (options.bp) {
+                add_song.apply(void 0, __spread(order.map(skill_string), [Math.round(mult).toLocaleString()]));
+            }
+            else {
+                add_song.apply(void 0, __spread(order.map(skill_string), [Math.round(mult) + "%"]));
+            }
+        }
+    }
+    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+    finally {
+        try {
+            if (orders_1_1 && !orders_1_1.done && (_a = orders_1["return"])) _a.call(orders_1);
+        }
+        finally { if (e_2) throw e_2.error; }
+    }
 }
 function order_init() {
     return __awaiter(this, void 0, void 0, function () {
-        var urlParams, _a, song_id, diff;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
+        function gen_orders() {
+            save_sel();
+            reset_table();
+            var sel = parse_sel();
+            add_orders(ord_options.skills, ord_options, sel);
+        }
+        var ord_options, display_sel;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
                 case 0: return [4 /*yield*/, load_songs()];
                 case 1:
-                    song_data = _b.sent();
-                    init_song_list(ord_options);
-                    // load options a second time as song selection is now initialised
+                    song_data = _a.sent();
+                    load_field(document.getElementById("display"));
+                    init_song_list(parseInt(get_input(document.getElementById("display"))));
                     load_sel();
-                    urlParams = new URLSearchParams(window.location.search);
-                    _a = __read(["song_id", "diff"].map(function (x) { return urlParams.get(x); }), 2), song_id = _a[0], diff = _a[1];
-                    if (song_id !== null && diff !== null)
-                        unparse_sel({ song_id: parseInt(song_id), diff: diff });
-                    gen_orders();
+                    options_init(function (options) { ord_options = options; gen_orders(); });
+                    song_sel.addEventListener("change", gen_orders);
+                    diff_sel.addEventListener("change", gen_orders);
+                    display_sel = document.getElementById("display");
+                    display_sel.addEventListener("change", function () {
+                        init_song_list(parseInt(get_input(document.getElementById("display"))));
+                        load_sel();
+                        gen_orders();
+                    });
                     return [2 /*return*/];
             }
         });
     });
 }
-load_all_fields();
-ord_options = parse_options();
-order_init().then(function () {
-    song_sel.addEventListener("change", gen_orders);
-    diff_sel.addEventListener("change", gen_orders);
-    var display_sel = document.getElementById("display");
-    display_sel.addEventListener("change", function () {
-        save_sel();
-        ord_options.display = parse_options().display;
-        order_init();
-    });
-    var gen_button = document.getElementById("gen-button");
-    gen_button.addEventListener("click", function () {
-        save_all_fields();
-        ord_options = parse_options();
-        order_init();
-    });
-    gen_button.disabled = false;
-});
+order_init();

@@ -18,6 +18,13 @@ function save_filters(): void {
     }
 }
 
+function load_filters(): void {
+    const filter_fields = document.querySelectorAll("#filters input,#filters select");
+    for (let i = 0; i < filter_fields.length; i++) {
+        load_field(<HTMLElement>filter_fields[i]);
+    }
+}
+
 interface ChartRow {
     song: Song;
     chart: Chart;
@@ -93,23 +100,16 @@ function display_song_table() {
 }
 
 async function init() {
-    load_all_fields();
     song_data = await load_songs();
-    gen_song_table(parse_options());
+    load_filters();
+    options_init(gen_song_table);
 
-    const gen_button = <HTMLButtonElement>document.getElementById("gen-button");
-    gen_button.addEventListener("click", function() {
-        save_all_fields();
-        gen_song_table(parse_options());
-    });
     ["easy", "normal", "hard", "expert", "special"].forEach(d =>
         (<HTMLInputElement>document.getElementById(d + "-filter"))
         .addEventListener("change", display_song_table));
 
     const display_sel = <HTMLSelectElement>document.getElementById("display");
     display_sel.addEventListener("change", display_song_table);
-
-    gen_button.disabled = false;
 
     const thead = document.querySelector("thead");
     if (thead) {

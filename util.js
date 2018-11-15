@@ -50,10 +50,6 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __spread = (this && this.__spread) || function () {
-    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
-    return ar;
-};
 var __values = (this && this.__values) || function (o) {
     var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
     if (m) return m.call(o);
@@ -66,29 +62,27 @@ var __values = (this && this.__values) || function (o) {
 };
 var song_data;
 function parse_skills() {
-    var e_1, _a;
-    var form_ids = __spread(Array(5).keys()).map(function (x) { return ["skill" + x, "sl" + x]; });
     var ret = [];
-    try {
-        for (var form_ids_1 = __values(form_ids), form_ids_1_1 = form_ids_1.next(); !form_ids_1_1.done; form_ids_1_1 = form_ids_1.next()) {
-            var ids = form_ids_1_1.value;
-            var _b = __read(JSON.parse(get_input(document.getElementById(ids[0]))), 3), mult = _b[0], type = _b[1], rarity = _b[2];
-            var lv = parseInt(get_input(document.getElementById(ids[1])));
-            ret.push({
-                mult: mult,
-                rarity: rarity,
-                sl: lv ? lv + 4 * type : lv
-            });
-        }
-    }
-    catch (e_1_1) { e_1 = { error: e_1_1 }; }
-    finally {
-        try {
-            if (form_ids_1_1 && !form_ids_1_1.done && (_a = form_ids_1["return"])) _a.call(form_ids_1);
-        }
-        finally { if (e_1) throw e_1.error; }
+    for (var id = 0; id < 5; id++) {
+        var skill_field = document.getElementById("skill" + id);
+        var sl_field = document.getElementById("sl" + id);
+        var _a = __read(JSON.parse(get_input(skill_field)), 3), mult = _a[0], type = _a[1], rarity = _a[2];
+        var lv = parseInt(get_input(sl_field));
+        ret.push({
+            mult: mult,
+            rarity: rarity,
+            type: type,
+            sl: lv ? lv + 4 * type : lv
+        });
     }
     return ret;
+}
+function unparse_skills(skills) {
+    for (var id = 0; id < 5; id++) {
+        var s = skills[id];
+        set_input(document.getElementById("skill" + id), JSON.stringify([s.mult, s.type, s.rarity]));
+        set_input(document.getElementById("sl" + id), JSON.stringify(s.sl ? s.sl - 4 * s.type : s.sl));
+    }
 }
 function add_song() {
     var fields = [];
@@ -131,14 +125,56 @@ var Display;
     Display[Display["PreferEn"] = 1] = "PreferEn";
     Display[Display["OnlyEn"] = 2] = "OnlyEn";
 })(Display || (Display = {}));
+var DEFAULT_OPTIONS = {
+    skills: Array(5).fill({ mult: 100, rarity: 4, type: 0, sl: 0 }),
+    fever: true,
+    bp: 200000,
+    encore: -1
+};
 function parse_options() {
     return {
         skills: parse_skills(),
-        display: parseInt(get_input(document.getElementById("display"))),
-        fever: document.getElementById("fever").checked,
+        fever: JSON.parse(get_input(document.getElementById("fever"))),
         bp: parseInt(get_input(document.getElementById("bp"))),
         encore: parseInt(get_input(document.getElementById("encore")))
     };
+}
+function unparse_options(options) {
+    var e_1, _a;
+    unparse_skills(options.skills);
+    try {
+        for (var _b = __values(["fever", "bp", "encore"]), _c = _b.next(); !_c.done; _c = _b.next()) {
+            var id = _c.value;
+            var field = document.getElementById(id);
+            set_input(field, JSON.stringify(options[id]));
+            field.classList.remove("is-changed");
+        }
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
+        }
+        finally { if (e_1) throw e_1.error; }
+    }
+}
+function options_init(on_change) {
+    var saved = localStorage.getItem("options");
+    var saved_opts = saved === null ? DEFAULT_OPTIONS : JSON.parse(saved);
+    unparse_options(saved_opts);
+    on_change(saved_opts);
+    var gen_button = document.getElementById("gen-button");
+    if (!(gen_button instanceof HTMLButtonElement))
+        throw "gen-button not found";
+    gen_button.addEventListener("click", function () {
+        var options = parse_options();
+        localStorage.setItem("options", JSON.stringify(options));
+        on_change(options);
+    });
+    gen_button.disabled = false;
+    for (var i = 0; i < opt_fields.length; i++) {
+        opt_fields[i].addEventListener("change", function (e) { return e.srcElement.classList.add("is-changed"); });
+    }
 }
 function load_songs() {
     return __awaiter(this, void 0, void 0, function () {
@@ -155,6 +191,8 @@ function load_songs() {
     });
 }
 function get_input(e) {
+    if (e instanceof HTMLElement)
+        e.classList.remove("is-changed");
     if (e instanceof HTMLInputElement) {
         if (e.type === "text" || e.type === "number")
             return e.value;

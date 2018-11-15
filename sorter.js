@@ -74,6 +74,12 @@ function save_filters() {
         save_field(filter_fields[i]);
     }
 }
+function load_filters() {
+    var filter_fields = document.querySelectorAll("#filters input,#filters select");
+    for (var i = 0; i < filter_fields.length; i++) {
+        load_field(filter_fields[i]);
+    }
+}
 var chart_table;
 var chart_options;
 function gen_song_table(options) {
@@ -174,27 +180,20 @@ function display_song_table() {
 }
 function init() {
     return __awaiter(this, void 0, void 0, function () {
-        var gen_button, display_sel, thead, cells_1, _loop_1, i;
+        var display_sel, thead, cells_1, _loop_1, i;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    load_all_fields();
-                    return [4 /*yield*/, load_songs()];
+                case 0: return [4 /*yield*/, load_songs()];
                 case 1:
                     song_data = _a.sent();
-                    gen_song_table(parse_options());
-                    gen_button = document.getElementById("gen-button");
-                    gen_button.addEventListener("click", function () {
-                        save_all_fields();
-                        gen_song_table(parse_options());
-                    });
+                    load_filters();
+                    options_init(gen_song_table);
                     ["easy", "normal", "hard", "expert", "special"].forEach(function (d) {
                         return document.getElementById(d + "-filter")
                             .addEventListener("change", display_song_table);
                     });
                     display_sel = document.getElementById("display");
                     display_sel.addEventListener("change", display_song_table);
-                    gen_button.disabled = false;
                     thead = document.querySelector("thead");
                     if (thead) {
                         cells_1 = thead.rows[0].cells;

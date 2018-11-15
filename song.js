@@ -257,8 +257,7 @@ function min_max_mult(chart, skills, options) {
 }
 function all_mult(chart, skills, options) {
     var mult_f = options.fever ? sl_mult_fev : sl_mult;
-    return perm_sort(mult_f, chart, skills).map(function (_a) {
-        var _b = __read(_a, 2), mult = _b[0], order = _b[1];
+    return skill_perms(skills).map(function (order) {
         return [full_skill_mult_exact(chart, order, options), order];
     });
 }
