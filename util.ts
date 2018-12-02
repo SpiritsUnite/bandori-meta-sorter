@@ -48,69 +48,104 @@ const DEFAULT_OPTIONS: Options = {
     encore: -1,
 };
 
-function parse_skills(): Skill[] {
-    let ret = [];
-    for (let id = 0; id < 5; id++) {
-        let skill_field = document.getElementById(`skill${id}`)
-        let sl_field = document.getElementById(`sl${id}`)
-        let [mult, type, rarity] = JSON.parse(get_input(skill_field));
-        let lv = parseInt(get_input(sl_field));
-        ret.push({
-            mult: mult,
-            rarity: rarity,
-            type: type,
-            sl: lv ? lv + 4*type : lv,
-        });
+type OptionsCB = (options: Options) => void;
+
+class OptionsUI {
+    // this field is set in the constructor when it calls this.set_options, but
+    // the compiler gets confused by the indirection
+    private _options!: Options;
+
+    constructor(private listeners: OptionsCB[] = []) {
+        let saved = localStorage.getItem("options");
+        this.set_options(saved === null ? DEFAULT_OPTIONS : JSON.parse(saved));
+
+        const gen_button = document.getElementById("gen-button");
+        if (!(gen_button instanceof HTMLButtonElement))
+            throw "gen-button not found";
+
+        gen_button.addEventListener("click", () => { this.set_options(); });
+        gen_button.disabled = false;
+
+        const opt_fields = document.querySelectorAll("#options input,#options select");
+        for (let i = 0; i < opt_fields.length; i++) {
+            opt_fields[i].addEventListener("change", e => e.srcElement!.classList.add("is-changed"));
+        }
+        Preset.preset_init(this);
     }
-    return ret;
-}
 
-function unparse_skills(skills: Skill[]): void {
-    for (let id = 0; id < 5; id++) {
-        let s = skills[id];
-        set_input(document.getElementById(`skill${id}`),
-            JSON.stringify([s.mult, s.type, s.rarity]));
-        set_input(document.getElementById(`sl${id}`),
-            JSON.stringify(s.sl ? s.sl - 4*s.type : s.sl));
+    /**
+     * add_listener
+     * Adds a listener and calls it with the current options
+     */
+    public add_listener(listener: OptionsCB) {
+        this.listeners.push(listener);
+        listener(this.options);
     }
-}
 
-function parse_options(): Options {
-    return {
-        skills: parse_skills(),
-        fever: JSON.parse(get_input(document.getElementById("fever"))),
-        bp: parseInt(get_input(document.getElementById("bp"))),
-        encore: parseInt(get_input(document.getElementById("encore"))),
-    };
-}
-
-function unparse_options(options: Options): void {
-    unparse_skills(options.skills);
-    for (let id of <(keyof Options)[]>["fever", "bp", "encore"]) {
-        let field = document.getElementById(id);
-        set_input(field, JSON.stringify(options[id]));
-        field!.classList.remove("is-changed");
+    get options(): Options {
+        return this._options;
     }
-}
 
-function options_init(on_change: (options: Options) => void): void {
-    let saved = localStorage.getItem("options");
-    let saved_opts = saved === null ? DEFAULT_OPTIONS : JSON.parse(saved);
-    unparse_options(saved_opts);
-    on_change(saved_opts);
+    /**
+     * set_options
+     * Sets the internal options, updating the UI and notifying listeners
+     */
+    public set_options(new_options?: Options) {
+        this._options = new_options || this.parse_options();
+        localStorage.setItem("options", JSON.stringify(this.options));
+        this.unparse_options(this.options);
+        this.notify_changed();
+    }
 
-    const gen_button = document.getElementById("gen-button");
-    if (!(gen_button instanceof HTMLButtonElement)) throw "gen-button not found";
-    gen_button.addEventListener("click", () => {
-        let options = parse_options();
-        localStorage.setItem("options", JSON.stringify(options));
-        on_change(options);
-    })
-    gen_button.disabled = false;
+    private notify_changed() {
+        for (let listener of this.listeners) {
+            listener(this.options);
+        }
+    }
 
-    const opt_fields = document.querySelectorAll("#options input,#options select");
-    for (let i = 0; i < opt_fields.length; i++) {
-        opt_fields[i].addEventListener("change", e => e.srcElement!.classList.add("is-changed"));
+    private parse_skills(): Skill[] {
+        let ret = [];
+        for (let id = 0; id < 5; id++) {
+            let skill_field = document.getElementById(`skill${id}`)
+            let sl_field = document.getElementById(`sl${id}`)
+            let [mult, type, rarity] = JSON.parse(get_input(skill_field));
+            let lv = parseInt(get_input(sl_field));
+            ret.push({
+                mult: mult,
+                rarity: rarity,
+                type: type,
+                sl: lv ? lv + 4*type : lv,
+            });
+        }
+        return ret;
+    }
+
+    private unparse_skills(skills: Skill[]): void {
+        for (let id = 0; id < 5; id++) {
+            let s = skills[id];
+            set_input(document.getElementById(`skill${id}`),
+                JSON.stringify([s.mult, s.type, s.rarity]));
+            set_input(document.getElementById(`sl${id}`),
+                JSON.stringify(s.sl ? s.sl - 4*s.type : s.sl));
+        }
+    }
+
+    private parse_options(): Options {
+        return {
+            skills: this.parse_skills(),
+            fever: JSON.parse(get_input(document.getElementById("fever"))),
+            bp: parseInt(get_input(document.getElementById("bp"))),
+            encore: parseInt(get_input(document.getElementById("encore"))),
+        };
+    }
+
+    private unparse_options(options: Options): void {
+        this.unparse_skills(options.skills);
+        for (let id of <(keyof Options)[]>["fever", "bp", "encore"]) {
+            let field = document.getElementById(id);
+            set_input(field, JSON.stringify(options[id]));
+            field!.classList.remove("is-changed");
+        }
     }
 }
 
