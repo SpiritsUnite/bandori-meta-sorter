@@ -7,5 +7,5 @@ env = Environment(
     lstrip_blocks=True
 )
 for tmpl in env.list_templates('html'):
-    with open(tmpl, "w") as f:
+    with open(f"docs/{tmpl}", "w") as f:
         f.write(env.get_template(tmpl).render())

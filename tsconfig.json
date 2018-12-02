@@ -3,6 +3,7 @@
     "compilerOptions": {
         "strict": true,
         "lib": ["es2017", "dom"],
-        "target": "es2017"
+        "target": "es2017",
+        "outDir": "docs",
     }
 }

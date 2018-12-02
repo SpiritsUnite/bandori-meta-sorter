@@ -1,6 +1,0 @@
-exclude:
-  - Makefile
-  - templates
-  - "*.ts"
-  - "*.py"
-  - tsconfig.json
