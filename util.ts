@@ -43,7 +43,7 @@ interface Options {
 }
 const DEFAULT_OPTIONS: Options = {
     skills: Array(5).fill({mult: 100, rarity: 4, type: 0, sl: 0}),
-    fever: true,
+    fever: false,
     bp: 200000,
     encore: -1,
 };
