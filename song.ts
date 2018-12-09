@@ -186,12 +186,15 @@ function full_skill_mult_exact(chart: Chart, skills: Skill[], options: Options) 
     let score = 0;
     let bp = options.bp || 100;
     for (let [at, event] of events) {
-        let skill_mult = active.reduce((x, y) => x*y, 1);
-        let note_score = (((bp * base(chart) * combo_mult / chart.combo + 0.00001)|0) * fev_mult * skill_mult + 0.00001) | 0;
+        let skill_mult = active[0] || 100;
+        let base_score = (bp * base(chart) * combo_mult / chart.combo + 0.00001) | 0;
+        let note_score = base_score * fev_mult * skill_mult;
+        if (skill_mult == 210) note_score -= 1;
+        note_score = (note_score / 100) | 0;
         score += (at - last) * note_score;
         last = at;
         if (event === "combo") combo_mult += 0.01;
-        else if (event === "skill_start") active.push((100 + skills[cur_skill++].mult)/100);
+        else if (event === "skill_start") active.push(100 + skills[cur_skill++].mult);
         else if (event === "skill_end") active.shift();
         else if (event === "fever_start") fev_mult = 2;
         else if (event === "fever_end") fev_mult = 1;
