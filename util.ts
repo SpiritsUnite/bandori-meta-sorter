@@ -41,6 +41,7 @@ interface Options {
     bp: number;
     encore: number;
     cards: (Card | undefined)[];
+    event: number;
 }
 const DEFAULT_OPTIONS: Options = {
     skills: Array(5).fill({mult: 100, rarity: 4, type: 0, sl: 0}),
@@ -48,6 +49,7 @@ const DEFAULT_OPTIONS: Options = {
     bp: 200000,
     encore: -1,
     cards: [],
+    event: -1,
 };
 
 type OptionsCB = (options: Options) => void;
@@ -60,9 +62,9 @@ class OptionsUI {
     constructor(private listeners: OptionsCB[] = []) {}
 
     public async init() {
-        let card_promise = card_init();
+        let inits = [card_init(), event_init()];
         song_data = await load_songs();
-        await card_promise;
+        await Promise.all(inits);
         
         let saved = localStorage.getItem("options");
         this.set_options(saved === null ? DEFAULT_OPTIONS : JSON.parse(saved));
@@ -173,13 +175,14 @@ class OptionsUI {
             bp: parseInt(get_input(document.getElementById("bp"))),
             encore: parseInt(get_input(document.getElementById("encore"))),
             cards: this.parse_cards(),
+            event: parseInt(get_input(document.getElementById("event"))),
         };
     }
 
     private unparse_options(options: Options): void {
         this.unparse_skills(options.skills);
         this.unparse_cards(options.cards);
-        for (let id of <(keyof Options)[]>["fever", "bp", "encore"]) {
+        for (let id of <(keyof Options)[]>["fever", "bp", "encore", "event"]) {
             let field = document.getElementById(id);
             set_input(field, JSON.stringify(options[id]));
             field!.classList.remove("is-changed");
@@ -187,7 +190,9 @@ class OptionsUI {
     }
 
     private calc_bp(): void {
-        set_input(document.getElementById("bp"), band_bp(this.parse_cards()).toString());
+        let options = this.parse_options();
+        set_input(document.getElementById("bp"),
+            band_bp(options.cards, event_data[options.event]).toString());
     }
 }
 
@@ -208,6 +213,7 @@ function get_input(e: HTMLElement | null): string {
 }
 
 function set_input(e: HTMLElement | null, value: string): void {
+    if (!value && e && e.dataset.default) value = e.dataset.default;
     if (e instanceof HTMLInputElement) {
         if (e.type === "text" || e.type === "number") e.value = value;
         else if (e.type === "checkbox") e.checked = JSON.parse(value);

@@ -42,15 +42,16 @@ const DEFAULT_OPTIONS = {
     bp: 200000,
     encore: -1,
     cards: [],
+    event: -1,
 };
 class OptionsUI {
     constructor(listeners = []) {
         this.listeners = listeners;
     }
     async init() {
-        let card_promise = card_init();
+        let inits = [card_init(), event_init()];
         song_data = await load_songs();
-        await card_promise;
+        await Promise.all(inits);
         let saved = localStorage.getItem("options");
         this.set_options(saved === null ? DEFAULT_OPTIONS : JSON.parse(saved));
         const gen_button = document.getElementById("gen-button");
@@ -147,19 +148,21 @@ class OptionsUI {
             bp: parseInt(get_input(document.getElementById("bp"))),
             encore: parseInt(get_input(document.getElementById("encore"))),
             cards: this.parse_cards(),
+            event: parseInt(get_input(document.getElementById("event"))),
         };
     }
     unparse_options(options) {
         this.unparse_skills(options.skills);
         this.unparse_cards(options.cards);
-        for (let id of ["fever", "bp", "encore"]) {
+        for (let id of ["fever", "bp", "encore", "event"]) {
             let field = document.getElementById(id);
             set_input(field, JSON.stringify(options[id]));
             field.classList.remove("is-changed");
         }
     }
     calc_bp() {
-        set_input(document.getElementById("bp"), band_bp(this.parse_cards()).toString());
+        let options = this.parse_options();
+        set_input(document.getElementById("bp"), band_bp(options.cards, event_data[options.event]).toString());
     }
 }
 async function load_songs() {
@@ -181,6 +184,8 @@ function get_input(e) {
     throw "oops";
 }
 function set_input(e, value) {
+    if (!value && e && e.dataset.default)
+        value = e.dataset.default;
     if (e instanceof HTMLInputElement) {
         if (e.type === "text" || e.type === "number")
             e.value = value;

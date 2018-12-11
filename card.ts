@@ -30,9 +30,12 @@ let SKILL_MAP = ["", "[10,0,1]", "[30,0,2]", "[60,0,3]", "[100,0,4]",
 let STORY_BONUS = [0, 900, 1350, 2100, 2550];
 let BAND_MULT = 0.425;
 let ATTR_MULT = 0.2;
+let EVENT_ATTR_MULT = 0.2;
+let EVENT_MEM_MULT = 0.1;
+let EVENT_BOTH_MULT = 0.5;
 
 function card_str(card: Card): string {
-    return `${card.rarity}* ${card.attr} ${names[card.characterId-1]} ${card.titleEn || card.title}`;
+    return `${card.rarity}* ${card.attr} ${names[card.characterId-1]} - ${card.titleEn || card.title}`;
 }
 
 let card_data : Map<number, Card> = new Map();
@@ -50,21 +53,52 @@ function card_bp(card: Card): number {
     return ret;
 }
 
-function band_bp(band: (Card | undefined)[]): number {
+function card_stat(card: Card, stat: Stat) {
+    let ret = (<any>card)["max" + stat];
+    if (card.episodes) {
+        for (let entry of card.episodes.entries) {
+            ret += entry["append" + stat];
+        }
+    }
+    if (card.training) {
+        ret += card.training["training" + stat];
+    }
+    return ret;
+}
+
+function band_bp(band: (Card | undefined)[], event?: Event): number {
+    let event_attr = "";
+    let event_mem: number[] = [];
+    if (event) {
+        event_attr = event.attr;
+        event_mem = event.mem;
+    }
+
     let band_v: number[] = Array(5).fill(0);
     let attr_v: { [attr: string]: number } = {};
     let ret = 0;
+    let event_bonus = 0;
     for (let card of band) {
         if (!card) continue;
+
         let bp = card_bp(card);
         band_v[((card.characterId-1) / 5) | 0] += bp;
+
         if (!attr_v[card.attr]) attr_v[card.attr] = 0;
         attr_v[card.attr] += bp;
+
+        if (event_attr == card.attr) event_bonus += bp * EVENT_ATTR_MULT;
+        if (event_mem.includes(card.characterId)) event_bonus += bp * EVENT_MEM_MULT;
+        if (event_attr == card.attr && event_mem.includes(card.characterId) && event!.stat) {
+            event_bonus += card_stat(card, event!.stat) * EVENT_BOTH_MULT;
+        }
+
         ret += bp;
     }
-    ret += Math.max(0, ...band_v) * BAND_MULT;
-    ret += Math.max(0, ...Object.values(attr_v)) * ATTR_MULT;
-    return ret | 0;
+    let item_bonus = Math.max(0, ...band_v) * BAND_MULT + Math.max(0, ...Object.values(attr_v)) * ATTR_MULT;
+    item_bonus = (item_bonus + 0.000001) | 0;
+    event_bonus = (event_bonus + 0.000001) | 0;
+    return ret + item_bonus + event_bonus;
 }
 
 async function card_init() {

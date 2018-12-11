@@ -22,6 +22,7 @@
             defer></script>
     <script src="song.js" defer></script>
     <script src="preset.js" defer></script>
+    <script src="event.js" defer></script>
     <script src="card.js" defer></script>
     <script src="util.js" defer></script>
     {% block head %}{% endblock %}
@@ -73,13 +74,19 @@
           </div>
           {% if i % 2 == 1 %}<div class="w-100 d-lg-none"></div>{% endif %}
       {% endfor %}
-
           <div class="w-100 d-none d-lg-block"></div>
-          <div class="col col-sm-3 col-lg mb-3">
+          <div class="col-sm mb-3">
+            <label for="event">Event</label>
+            <select class="custom-select" id="event" data-default="-1">
+              <option value="-1">No event</option>
+            </select>
+          </div>
+          <div class="w-100 d-lg-none"></div>
+          <div class="col col-sm-6 col-md-3 col-lg mb-3">
             <label for="bp">BP</label>
             <input type="number" class="form-control" id="bp" data-default="0">
           </div>
-          <div class="col col-sm-3 col-lg mb-3">
+          <div class="col col-sm-6 col-md-3 col-lg mb-3">
             <label for="encore">Encore</label>
             <select class="custom-select" data-default="-1" id="encore">
               <option value="-1">Max</option>
@@ -88,14 +95,13 @@
               {% endfor %}
             </select>
           </div>
-          <div class="w-100 d-lg-none"></div>
+          <div class="w-100 d-md-none"></div>
           <div class="col align-self-center">
             <div class="custom-control custom-checkbox">
               <input class="custom-control-input" type="checkbox" id="fever" data-default="true">
               <label class="custom-control-label" for="fever">Fever</label>
             </div>
           </div>
-          <div class="col d-none d-lg-block"></div>
           <div class="col align-self-end">
             <!-- TODO: replace with better link -->
             <a class="float-right" data-toggle="collapse" href="#presets">
