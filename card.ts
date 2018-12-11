@@ -18,6 +18,7 @@ interface Card {
     skill: { skillId: number; };
     episodes: any;
     training: any;
+    releasedAt: number;
 }
 
 let SKILL_MAP = ["", "[10,0,1]", "[30,0,2]", "[60,0,3]", "[100,0,4]",
@@ -77,6 +78,7 @@ async function card_init() {
     ])).map(x => x.data);
     jp_cards.sort((lhs, rhs) => rhs.rarity - lhs.rarity || lhs.cardId - rhs.cardId);
     for (let card of jp_cards) {
+        if (card.releasedAt > Date.now()) continue;
         card.attr = card.attr[0].toUpperCase() + card.attr.slice(1);
         card_data.set(card.cardId, card);
     }

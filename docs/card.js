@@ -57,6 +57,8 @@ async function card_init() {
     ])).map(x => x.data);
     jp_cards.sort((lhs, rhs) => rhs.rarity - lhs.rarity || lhs.cardId - rhs.cardId);
     for (let card of jp_cards) {
+        if (card.releasedAt > Date.now())
+            continue;
         card.attr = card.attr[0].toUpperCase() + card.attr.slice(1);
         card_data.set(card.cardId, card);
     }
