@@ -40,12 +40,14 @@ interface Options {
     fever: boolean;
     bp: number;
     encore: number;
+    cards: (Card | undefined)[];
 }
 const DEFAULT_OPTIONS: Options = {
     skills: Array(5).fill({mult: 100, rarity: 4, type: 0, sl: 0}),
     fever: false,
     bp: 200000,
     encore: -1,
+    cards: [],
 };
 
 type OptionsCB = (options: Options) => void;
@@ -55,16 +57,27 @@ class OptionsUI {
     // the compiler gets confused by the indirection
     private _options!: Options;
 
-    constructor(private listeners: OptionsCB[] = []) {
+    constructor(private listeners: OptionsCB[] = []) {}
+
+    public async init() {
+        let card_promise = card_init();
+        song_data = await load_songs();
+        await card_promise;
+        
         let saved = localStorage.getItem("options");
         this.set_options(saved === null ? DEFAULT_OPTIONS : JSON.parse(saved));
 
         const gen_button = document.getElementById("gen-button");
         if (!(gen_button instanceof HTMLButtonElement))
             throw "gen-button not found";
-
         gen_button.addEventListener("click", () => { this.set_options(); });
         gen_button.disabled = false;
+
+        const bp_button = document.getElementById("bp-button");
+        if (!(bp_button instanceof HTMLButtonElement))
+            throw "bp-button not found";
+        bp_button.addEventListener("click", () => { this.calc_bp(); this.set_options(); });
+        bp_button.disabled = false;
 
         const opt_fields = document.querySelectorAll("#options input,#options select");
         for (let i = 0; i < opt_fields.length; i++) {
@@ -130,22 +143,51 @@ class OptionsUI {
         }
     }
 
+    private parse_cards(): (Card | undefined)[] {
+        let ret = [];
+        for (let i = 0; i < 5; i++) {
+            let card_btn = document.getElementById(`card${i}`);
+            ret.push(card_data.get(parseInt(get_input(card_btn))));
+        }
+        return ret;
+    }
+
+    private unparse_cards(band: (Card | undefined)[] = []): void {
+        for (let i = 0; i < 5; i++) {
+            let card_btn = <HTMLButtonElement>document.getElementById(`card${i}`);
+            let card = band[i];
+            if (card) {
+                card_btn.value = card.cardId.toString();
+                card_btn.textContent = card_str(card);
+            } else {
+                card_btn.value = "-1";
+                card_btn.textContent = "Select card...";
+            }
+        }
+    }
+
     private parse_options(): Options {
         return {
             skills: this.parse_skills(),
             fever: JSON.parse(get_input(document.getElementById("fever"))),
             bp: parseInt(get_input(document.getElementById("bp"))),
             encore: parseInt(get_input(document.getElementById("encore"))),
+            cards: this.parse_cards(),
         };
     }
 
     private unparse_options(options: Options): void {
         this.unparse_skills(options.skills);
+        this.unparse_cards(options.cards);
         for (let id of <(keyof Options)[]>["fever", "bp", "encore"]) {
             let field = document.getElementById(id);
             set_input(field, JSON.stringify(options[id]));
             field!.classList.remove("is-changed");
         }
+    }
+
+    private calc_bp(): void {
+        set_input(document.getElementById("bp"), band_bp(this.parse_cards()).toString());
     }
 }
 
@@ -160,16 +202,18 @@ function get_input(e: HTMLElement | null): string {
         if (e.type === "text" || e.type === "number") return e.value;
         else if (e.type === "checkbox") return JSON.stringify(e.checked);
     }
-    else if (e instanceof HTMLSelectElement) return e.value;
+    else if (e instanceof HTMLSelectElement ||
+        e instanceof HTMLButtonElement) return e.value;
     throw "oops";
 }
 
-function set_input(e: HTMLElement | null, value: string) {
+function set_input(e: HTMLElement | null, value: string): void {
     if (e instanceof HTMLInputElement) {
         if (e.type === "text" || e.type === "number") e.value = value;
         else if (e.type === "checkbox") e.checked = JSON.parse(value);
     }
-    else if (e instanceof HTMLSelectElement) e.value = value;
+    else if (e instanceof HTMLSelectElement ||
+        e instanceof HTMLButtonElement) e.value = value;
 }
 
 function load_field(e: HTMLElement) {

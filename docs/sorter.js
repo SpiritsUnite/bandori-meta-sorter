@@ -75,9 +75,10 @@ var sorter;
             add_row([title, `order.html?song_id=${song_id}&diff=${diff}`], diff, level.toString(), Math.round(min).toLocaleString() + score_end, Math.round(avg).toLocaleString() + score_end, Math.round(max).toLocaleString() + score_end);
         }
     }
-    let options_ui = new OptionsUI();
+    let options_ui;
     async function init() {
-        song_data = await load_songs();
+        options_ui = new OptionsUI();
+        await options_ui.init();
         load_filters();
         options_ui.add_listener(gen_song_table);
         ["easy", "normal", "hard", "expert", "special"].forEach(d => document.getElementById(d + "-filter")

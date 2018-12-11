@@ -20,3 +20,7 @@ input::-webkit-inner-spin-button {
 .custom-control-input.is-changed ~ .custom-control-label {
     color: #e6ac00;
 }
+
+.card-btn {
+    white-space: normal;
+}

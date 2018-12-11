@@ -79,9 +79,11 @@ namespace order {
 
     }
 
-    let options_ui = new OptionsUI();
+    let options_ui;
 
     async function order_init() {
+        options_ui = new OptionsUI();
+        await options_ui.init();
         let ord_options : Options;
 
         function gen_orders() {
@@ -91,7 +93,6 @@ namespace order {
             add_orders(ord_options.skills, ord_options, sel);
         }
 
-        song_data = await load_songs();
         load_field(display_sel);
 
         init_song_list(parseInt(get_input(display_sel)));
