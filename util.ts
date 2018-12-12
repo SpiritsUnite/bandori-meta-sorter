@@ -39,7 +39,7 @@ interface Options {
     skills: Skill[];
     fever: boolean;
     bp: number;
-    encore: number;
+    encore: [number, Skill?];
     cards: (Card | undefined)[];
     event: number;
 }
@@ -47,7 +47,7 @@ const DEFAULT_OPTIONS: Options = {
     skills: Array(5).fill({mult: 100, rarity: 4, type: 0, sl: 0}),
     fever: false,
     bp: 200000,
-    encore: -1,
+    encore: [-1, undefined],
     cards: [],
     event: -1,
 };
@@ -171,11 +171,13 @@ class OptionsUI {
     }
 
     private parse_options(): Options {
+        let skills = this.parse_skills();
+        let enc_id = parseInt(get_input(document.getElementById("encore")));
         return {
-            skills: this.parse_skills(),
+            skills: skills,
             fever: JSON.parse(get_input(document.getElementById("fever"))),
             bp: parseInt(get_input(document.getElementById("bp"))),
-            encore: parseInt(get_input(document.getElementById("encore"))),
+            encore: [enc_id, skills[enc_id]],
             cards: this.parse_cards(),
             event: parseInt(get_input(document.getElementById("event"))),
         };
@@ -186,7 +188,8 @@ class OptionsUI {
         this.unparse_cards(options.cards);
         for (let id of <(keyof Options)[]>["fever", "bp", "encore", "event"]) {
             let field = document.getElementById(id);
-            set_input(field, JSON.stringify(options[id]));
+            if (id == "encore") set_input(field, JSON.stringify(options[id][0]));
+            else set_input(field, JSON.stringify(options[id]));
             field!.classList.remove("is-changed");
         }
     }

@@ -106,13 +106,13 @@ function perm_sort(mult_f: MultF, chart: Chart, skills: Skill[]) {
     return perm_list.sort((a, b) => a[0] - b[0]);
 }
 
-function max_enc(mult_f: MultF, chart: Chart, skills: Skill[]) {
+function max_enc(mult_f: MultF, chart: Chart, skills: Skill[]): Skill {
     let mults = [...skills.map(s => s.mult / 100 * mult_f(chart, 5, s.sl))]
-    return mults.reduce((max_idx, x, i) => x > mults[max_idx] ? i : max_idx, 0);
+    return skills[mults.reduce((max_idx, x, i) => x > mults[max_idx] ? i : max_idx, 0)];
 }
 
 function avg_mult_helper(mult_f: MultF, base_f: (chart: Chart) => number) {
-    return function(chart: Chart, skills: Skill[], encore: number) {
+    return function(chart: Chart, skills: Skill[], encore?: Skill) {
         let c_sum = 0;
         for (let skill of skills) {
             for (let i = 0; i < 5; i++) {
@@ -120,8 +120,8 @@ function avg_mult_helper(mult_f: MultF, base_f: (chart: Chart) => number) {
             }
         }
         let ret = base_f(chart) + c_sum/5;
-        if (encore == -1) encore = max_enc(mult_f, chart, skills);
-        ret += skills[encore].mult / 100 * mult_f(chart, 5, skills[encore].sl);
+        if (!encore) encore = max_enc(mult_f, chart, skills);
+        ret += encore.mult / 100 * mult_f(chart, 5, encore.sl);
         return ret;
     }
 }
@@ -143,23 +143,22 @@ function avg_mult(chart: Chart, skills: Skill[], options: Options) {
     return (options.fever ?
         avg_mult_helper(sl_mult_fev, (chart) => base_combo(chart) + fev_mult(chart)) :
         avg_mult_helper(sl_mult, base_combo)
-    )(chart, skills, options.encore);
+    )(chart, skills, options.encore[1]);
 }
 
 function full_skill_mult(chart: Chart, skills: Skill[], options: Options) {
     const mult_f = options.fever ? sl_mult_fev : sl_mult;
     let ret = base_combo(chart);
     if (options.fever) ret += fev_mult(chart);
-    let encore = options.encore === -1 ? max_enc(mult_f, chart, options.skills) : options.encore;
-    ret += options.skills[encore].mult / 100 * mult_f(chart, 5, options.skills[encore].sl);
+    let encore = options.encore[1] || max_enc(mult_f, chart, options.skills);
+    ret += encore.mult / 100 * mult_f(chart, 5, encore.sl);
     ret += perm_mult(mult_f, chart, skills);
     return ret;
 }
 
 function full_skill_mult_exact(chart: Chart, skills: Skill[], options: Options) {
-    let encore = options.encore;
-    if (encore == -1) encore = max_enc(options.fever ? sl_mult_fev : sl_mult, chart, skills);
-    skills = [...skills, skills[encore]];
+    let encore = options.encore[1] ||  max_enc(options.fever ? sl_mult_fev : sl_mult, chart, skills);
+    skills = [...skills, encore];
 
     // types of events
     // combo cutoff, skill act, fever, skill end
