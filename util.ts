@@ -121,8 +121,8 @@ class OptionsUI {
     private parse_skills(): Skill[] {
         let ret = [];
         for (let id = 0; id < 5; id++) {
-            let skill_field = document.getElementById(`skill${id}`)
-            let sl_field = document.getElementById(`sl${id}`)
+            let skill_field = document.getElementById(`skill${id}`);
+            let sl_field = document.getElementById(`sl${id}`);
             let [mult, type, rarity] = JSON.parse(get_input(skill_field));
             let lv = parseInt(get_input(sl_field));
             ret.push({
@@ -138,10 +138,12 @@ class OptionsUI {
     private unparse_skills(skills: Skill[]): void {
         for (let id = 0; id < 5; id++) {
             let s = skills[id];
-            set_input(document.getElementById(`skill${id}`),
-                JSON.stringify([s.mult, s.type, s.rarity]));
-            set_input(document.getElementById(`sl${id}`),
-                JSON.stringify(s.sl ? s.sl - 4*s.type : s.sl));
+            let skill_field = document.getElementById(`skill${id}`);
+            let sl_field = document.getElementById(`sl${id}`);
+            set_input(skill_field, JSON.stringify([s.mult, s.type, s.rarity]));
+            set_input(sl_field, JSON.stringify(s.sl ? s.sl - 4*s.type : s.sl));
+            skill_field!.classList.remove("is-changed");
+            sl_field!.classList.remove("is-changed");
         }
     }
 
