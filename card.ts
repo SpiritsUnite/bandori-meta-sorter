@@ -11,10 +11,14 @@ interface Card {
     attr: string;
     title: string;
     titleEn?: string;
-    maxPerformance: number;
-    maxTechnique: number;
-    maxVisual: number;
-    totalMaxParam: number;
+    simpleParams: {
+        max: {
+            performance: number;
+            technique: number;
+            visual: number;
+            total: number;
+        }
+    };
     skill: { skillId: number; };
     episodes: any;
     training: any;
@@ -41,7 +45,7 @@ function card_str(card: Card): string {
 let card_data : Map<number, Card> = new Map();
 
 function card_bp(card: Card): number {
-    let ret = card.totalMaxParam;
+    let ret = card.simpleParams.max.total;
     if (card.episodes) {
         for (let entry of card.episodes.entries) {
             ret += entry.appendVisual*3;
@@ -54,14 +58,14 @@ function card_bp(card: Card): number {
 }
 
 function card_stat(card: Card, stat: Stat) {
-    let ret = (<any>card)["max" + stat];
+    let ret = card.simpleParams.max[stat]
     if (card.episodes) {
         for (let entry of card.episodes.entries) {
-            ret += entry["append" + stat];
+            ret += entry["appendVisual"];
         }
     }
     if (card.training) {
-        ret += card.training["training" + stat];
+        ret += card.training["trainingVisual"];
     }
     return ret;
 }

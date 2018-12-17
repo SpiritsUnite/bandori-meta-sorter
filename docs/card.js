@@ -20,7 +20,7 @@ function card_str(card) {
 }
 let card_data = new Map();
 function card_bp(card) {
-    let ret = card.totalMaxParam;
+    let ret = card.simpleParams.max.total;
     if (card.episodes) {
         for (let entry of card.episodes.entries) {
             ret += entry.appendVisual * 3;
@@ -32,14 +32,14 @@ function card_bp(card) {
     return ret;
 }
 function card_stat(card, stat) {
-    let ret = card["max" + stat];
+    let ret = card.simpleParams.max[stat];
     if (card.episodes) {
         for (let entry of card.episodes.entries) {
-            ret += entry["append" + stat];
+            ret += entry["appendVisual"];
         }
     }
     if (card.training) {
-        ret += card.training["training" + stat];
+        ret += card.training["trainingVisual"];
     }
     return ret;
 }
