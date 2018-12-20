@@ -76,6 +76,9 @@ function band_bp(band, event) {
     event_bonus = (event_bonus + 0.000001) | 0;
     return ret + item_bonus + event_bonus;
 }
+function strcmp(a, b) {
+    return (a < b ? -1 : Number(a > b));
+}
 async function card_init() {
     let responses = await Promise.all([
         fetch("https://api.bandori.ga/v1/jp/card"),
@@ -85,7 +88,7 @@ async function card_init() {
         responses[0].json(),
         responses[1].json()
     ])).map(x => x.data);
-    jp_cards.sort((lhs, rhs) => rhs.rarity - lhs.rarity || lhs.cardId - rhs.cardId);
+    jp_cards.sort((lhs, rhs) => rhs.rarity - lhs.rarity || strcmp(lhs.attr, rhs.attr) || lhs.cardId - rhs.cardId);
     for (let card of jp_cards) {
         if (card.releasedAt > Date.now())
             continue;
