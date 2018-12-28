@@ -1,4 +1,4 @@
-type Stat = "performance" | "technique" | "visual";
+type Stat = "Performance" | "Technique" | "Visual";
 
 interface Event {
     event_id: number;

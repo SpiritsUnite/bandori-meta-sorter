@@ -13,9 +13,7 @@ interface Card {
     titleEn?: string;
     simpleParams: {
         max: {
-            performance: number;
-            technique: number;
-            visual: number;
+            [param: string]: number
             total: number;
         }
     };
@@ -59,7 +57,7 @@ function card_bp(card: Card): number {
 }
 
 function card_stat(card: Card, stat: Stat) {
-    let ret = card.simpleParams.max[stat]
+    let ret = card.simpleParams.max[stat.toLowerCase()];
     if (card.episodes) {
         for (let entry of card.episodes.entries) {
             ret += entry["appendVisual"];

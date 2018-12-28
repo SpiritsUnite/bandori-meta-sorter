@@ -33,7 +33,7 @@ function card_bp(card) {
     return ret;
 }
 function card_stat(card, stat) {
-    let ret = card.simpleParams.max[stat];
+    let ret = card.simpleParams.max[stat.toLowerCase()];
     if (card.episodes) {
         for (let entry of card.episodes.entries) {
             ret += entry["appendVisual"];
