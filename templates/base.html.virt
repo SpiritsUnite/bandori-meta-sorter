@@ -27,12 +27,12 @@
     <script src="util.js" defer></script>
     {% block head %}{% endblock %}
 
-    <title>Bandori Song Sorter</title>
+    <title>Bandori Score Calculator</title>
   </head>
   <body>
     <div class="container">
       <h2 class="mt-3">
-        Bandori Song Sorter
+        Bandori Score Calculator
         <small class="text-muted">Disclaimer: WIP</small>
       </h2>
       <div id="options">
