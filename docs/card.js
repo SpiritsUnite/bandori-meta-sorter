@@ -90,8 +90,10 @@ async function card_init() {
         responses[1].json()
     ])).map(x => x.data);
     jp_cards.sort((lhs, rhs) => rhs.rarity - lhs.rarity || strcmp(lhs.attr, rhs.attr) || lhs.cardId - rhs.cardId);
+    // Add two days leniency for new cards
+    let cutoff_date = Date.now() + 2 * 86400000;
     for (let card of jp_cards) {
-        if (card.releasedAt > Date.now())
+        if (card.releasedAt > cutoff_date)
             continue;
         card.attr = card.attr[0].toUpperCase() + card.attr.slice(1);
         card_data.set(card.cardId, card);
