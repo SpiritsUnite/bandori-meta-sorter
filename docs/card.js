@@ -11,8 +11,10 @@ let SKILL_MAP = ["", "[10,0,1]", "[30,0,2]", "[60,0,3]", "[100,0,4]",
     "[110,0,4]", "", "[115,0,4]", "[40,0,3]", "[80,0,4]",
     "", "", "[65,0,3]", "[110,0,4]"];
 let STORY_BONUS = [0, 900, 1350, 2100, 2550];
-let BAND_MULT = 0.425;
-let ATTR_MULT = 0.2;
+let EN_BAND_MULT = 0.425;
+let EN_ATTR_MULT = 0.2;
+let JP_BAND_MULT = 0.445;
+let JP_ATTR_MULT = 0.24;
 let EVENT_ATTR_MULT = 0.2;
 let EVENT_MEM_MULT = 0.1;
 let EVENT_BOTH_MULT = 0.5;
@@ -44,7 +46,7 @@ function card_stat(card, stat) {
     }
     return ret;
 }
-function band_bp(band, event) {
+function band_bp(band, band_mult, attr_mult, event) {
     let event_attr = "";
     let event_mem = [];
     if (event) {
@@ -72,7 +74,7 @@ function band_bp(band, event) {
         }
         ret += bp;
     }
-    let item_bonus = Math.max(0, ...band_v) * BAND_MULT + Math.max(0, ...Object.values(attr_v)) * ATTR_MULT;
+    let item_bonus = Math.max(0, ...band_v) * band_mult + Math.max(0, ...Object.values(attr_v)) * attr_mult;
     item_bonus = (item_bonus + 0.000001) | 0;
     event_bonus = (event_bonus + 0.000001) | 0;
     return ret + item_bonus + event_bonus;

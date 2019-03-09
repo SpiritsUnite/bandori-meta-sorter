@@ -78,8 +78,14 @@ class OptionsUI {
         const bp_button = document.getElementById("bp-button");
         if (!(bp_button instanceof HTMLButtonElement))
             throw "bp-button not found";
-        bp_button.addEventListener("click", () => { this.calc_bp(); this.set_options(); });
+        bp_button.addEventListener("click", () => { this.calc_en_bp(); this.set_options(); });
         bp_button.disabled = false;
+
+        const jp_button = document.getElementById("jp-button");
+        if (!(jp_button instanceof HTMLButtonElement))
+            throw "jp-button not found";
+        jp_button.addEventListener("click", () => { this.calc_jp_bp(); this.set_options(); });
+        jp_button.disabled = false;
 
         const opt_fields = document.querySelectorAll("#options input,#options select");
         for (let i = 0; i < opt_fields.length; i++) {
@@ -194,10 +200,16 @@ class OptionsUI {
         }
     }
 
-    private calc_bp(): void {
+    private calc_en_bp(): void {
         let options = this.parse_options();
         set_input(document.getElementById("bp"),
-            band_bp(options.cards, event_data[options.event]).toString());
+            band_bp(options.cards, EN_BAND_MULT, EN_ATTR_MULT, event_data[options.event]).toString());
+    }
+
+    private calc_jp_bp(): void {
+        let options = this.parse_options();
+        set_input(document.getElementById("bp"),
+            band_bp(options.cards, JP_BAND_MULT, JP_ATTR_MULT, event_data[options.event]).toString());
     }
 }
 

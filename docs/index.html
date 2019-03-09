@@ -39,7 +39,7 @@
       </h2>
       <div id="options">
         <div class="row">
-          <div class="col-sm mb-2">
+          <div class="col-sm mb-4">
             <label>Skill 1</label>
             <div class="input-group mb-2">
               <select class="custom-select" data-default="[100,0,4]" id="skill0">
@@ -57,8 +57,9 @@
                 <option value="[30,0,2]">2* 30%</option>
                 <option value="[10,2,2]">2* 10%</option>
                 <option value="[10,0,1]">1* 10%</option>
+                <option value="[0,0,1]">0* 0%</option>
               </select>
-              <select class="custom-select" style="flex: 0 1 content" data-default="0" id="sl0">
+              <select class="custom-select" style="flex: 0 1 auto; width: auto" data-default="0" id="sl0">
                 <option value="0">1</option>
                 <option value="1">2</option>
                 <option value="2">3</option>
@@ -73,7 +74,7 @@
               <button class="btn btn-outline-secondary card-del">&times;</button>
             </div>
           </div>
-          <div class="col-sm mb-2">
+          <div class="col-sm mb-4">
             <label>Skill 2</label>
             <div class="input-group mb-2">
               <select class="custom-select" data-default="[100,0,4]" id="skill1">
@@ -91,8 +92,9 @@
                 <option value="[30,0,2]">2* 30%</option>
                 <option value="[10,2,2]">2* 10%</option>
                 <option value="[10,0,1]">1* 10%</option>
+                <option value="[0,0,1]">0* 0%</option>
               </select>
-              <select class="custom-select" style="flex: 0 1 content" data-default="0" id="sl1">
+              <select class="custom-select" style="flex: 0 1 auto; width: auto" data-default="0" id="sl1">
                 <option value="0">1</option>
                 <option value="1">2</option>
                 <option value="2">3</option>
@@ -107,7 +109,7 @@
               <button class="btn btn-outline-secondary card-del">&times;</button>
             </div>
           </div>
-<div class="w-100 d-lg-none"></div>          <div class="col-sm mb-2">
+<div class="w-100 d-lg-none"></div>          <div class="col-sm mb-4">
             <label>Skill 3</label>
             <div class="input-group mb-2">
               <select class="custom-select" data-default="[100,0,4]" id="skill2">
@@ -125,8 +127,9 @@
                 <option value="[30,0,2]">2* 30%</option>
                 <option value="[10,2,2]">2* 10%</option>
                 <option value="[10,0,1]">1* 10%</option>
+                <option value="[0,0,1]">0* 0%</option>
               </select>
-              <select class="custom-select" style="flex: 0 1 content" data-default="0" id="sl2">
+              <select class="custom-select" style="flex: 0 1 auto; width: auto" data-default="0" id="sl2">
                 <option value="0">1</option>
                 <option value="1">2</option>
                 <option value="2">3</option>
@@ -141,7 +144,7 @@
               <button class="btn btn-outline-secondary card-del">&times;</button>
             </div>
           </div>
-          <div class="col-sm mb-2">
+          <div class="col-sm mb-4">
             <label>Skill 4</label>
             <div class="input-group mb-2">
               <select class="custom-select" data-default="[100,0,4]" id="skill3">
@@ -159,8 +162,9 @@
                 <option value="[30,0,2]">2* 30%</option>
                 <option value="[10,2,2]">2* 10%</option>
                 <option value="[10,0,1]">1* 10%</option>
+                <option value="[0,0,1]">0* 0%</option>
               </select>
-              <select class="custom-select" style="flex: 0 1 content" data-default="0" id="sl3">
+              <select class="custom-select" style="flex: 0 1 auto; width: auto" data-default="0" id="sl3">
                 <option value="0">1</option>
                 <option value="1">2</option>
                 <option value="2">3</option>
@@ -175,7 +179,7 @@
               <button class="btn btn-outline-secondary card-del">&times;</button>
             </div>
           </div>
-<div class="w-100 d-lg-none"></div>          <div class="col-sm mb-2">
+<div class="w-100 d-lg-none"></div>          <div class="col-sm mb-4">
             <label>Skill 5</label>
             <div class="input-group mb-2">
               <select class="custom-select" data-default="[100,0,4]" id="skill4">
@@ -193,8 +197,9 @@
                 <option value="[30,0,2]">2* 30%</option>
                 <option value="[10,2,2]">2* 10%</option>
                 <option value="[10,0,1]">1* 10%</option>
+                <option value="[0,0,1]">0* 0%</option>
               </select>
-              <select class="custom-select" style="flex: 0 1 content" data-default="0" id="sl4">
+              <select class="custom-select" style="flex: 0 1 auto; width: auto" data-default="0" id="sl4">
                 <option value="0">1</option>
                 <option value="1">2</option>
                 <option value="2">3</option>
@@ -210,18 +215,18 @@
             </div>
           </div>
           <div class="w-100 d-none d-lg-block"></div>
-          <div class="col-sm mb-3">
+          <div class="col-sm mb-4">
             <label for="event">Event</label>
             <select class="custom-select" id="event" data-default="-1">
               <option value="-1">No event</option>
             </select>
           </div>
           <div class="w-100 d-lg-none"></div>
-          <div class="col col-sm-6 col-md-3 col-lg mb-3">
+          <div class="col col-sm-6 col-md-3 col-lg mb-4">
             <label for="bp">BP</label>
             <input type="number" class="form-control" id="bp" data-default="0">
           </div>
-          <div class="col col-sm-6 col-md-3 col-lg mb-3">
+          <div class="col col-sm-6 col-md-3 col-lg mb-4">
             <label for="encore">Encore</label>
             <select class="custom-select" data-default="-1" id="encore">
               <option value="-1">Max</option>
@@ -517,7 +522,10 @@
       <nav class="nav nav-tabs mt-3 mb-3">
         <a class="nav-item nav-link active" href="index.html">Score List</a>
         <a class="nav-item nav-link mr-auto" href="order.html">RNG</a>
-        <button class="btn btn-primary mb-1" id="bp-button" disabled>Calculate BP</button>
+        <div class="btn-group" role="group">
+          <button class="btn btn-primary mb-1" id="bp-button" disabled>Calculate BP</button>
+          <button class="btn btn-secondary mb-1" id="jp-button" disabled>JP</button>
+        </div>
         <button class="btn btn-primary ml-1 mb-1" id="gen-button" disabled>Generate</button>
       </nav>
 <div id="filters" class="form-row form-inline justify-content-end">
